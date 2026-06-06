@@ -1,6 +1,23 @@
 (() => {
   const ADVANCED_KEY = "kirei.showAdvanced";
 
+  const storage = {
+    get(key) {
+      try {
+        return window.localStorage?.getItem(key) ?? null;
+      } catch {
+        return null;
+      }
+    },
+    set(key, value) {
+      try {
+        window.localStorage?.setItem(key, value);
+      } catch {
+        // Local file previews may block storage; the toggle should still work.
+      }
+    },
+  };
+
   const typeset = (node) => {
     if (window.MathJax?.typesetPromise) {
       window.MathJax.typesetPromise([node]).catch(() => {});
@@ -9,7 +26,7 @@
 
   const setAdvancedVisible = (visible) => {
     document.body.classList.toggle("show-advanced", visible);
-    localStorage.setItem(ADVANCED_KEY, visible ? "1" : "0");
+    storage.set(ADVANCED_KEY, visible ? "1" : "0");
   };
 
   const closeOtherGaps = (activeId) => {
@@ -27,7 +44,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     const advancedToggle = document.getElementById("advanced-toggle");
-    const shouldShowAdvanced = localStorage.getItem(ADVANCED_KEY) === "1";
+    const shouldShowAdvanced = storage.get(ADVANCED_KEY) === "1";
 
     if (advancedToggle) {
       advancedToggle.checked = shouldShowAdvanced;
