@@ -29,6 +29,14 @@
     storage.set(ADVANCED_KEY, visible ? "1" : "0");
   };
 
+  const updateAdvancedLabel = (count) => {
+    const label = document.getElementById("advanced-toggle-label");
+    if (!label) {
+      return;
+    }
+    label.textContent = `発展を表示: ${count}件`;
+  };
+
   const closeOtherGaps = (activeId) => {
     document.querySelectorAll(".kgap-trigger[aria-expanded='true']").forEach((button) => {
       if (button.dataset.kgapTarget === activeId) {
@@ -44,7 +52,10 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     const advancedToggle = document.getElementById("advanced-toggle");
+    const advancedCount = document.querySelectorAll("[data-advanced]").length;
     const shouldShowAdvanced = storage.get(ADVANCED_KEY) === "1";
+
+    updateAdvancedLabel(advancedCount);
 
     if (advancedToggle) {
       advancedToggle.checked = shouldShowAdvanced;

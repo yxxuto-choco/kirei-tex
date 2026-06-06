@@ -354,6 +354,10 @@ class Renderer:
 
         if env == "kadvanced":
             return (
+                '<div class="kadvanced-notice" data-advanced-notice>\n'
+                '  <span class="kadvanced-notice-label">発展内容があります</span>\n'
+                '  <span class="kadvanced-notice-text">上の「発展を表示」をオンにすると読めます。</span>\n'
+                "</div>\n"
                 '<section class="kadvanced" data-advanced>\n'
                 '  <div class="kadvanced-ribbon">発展</div>\n'
                 f'  <div class="kadvanced-body">\n{inner_html}\n  </div>\n'
