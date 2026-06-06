@@ -53,6 +53,50 @@ HTMLの `<details>` / `<summary>` に変換されます。
 
 画面上部の「発展を表示」トグルで表示・非表示を切り替えます。
 
+### 証明
+
+```tex
+\begin{kproof}
+証明本文
+\end{kproof}
+```
+
+「証明」というラベル付きの折りたたみボックスに変換されます。
+デフォルトでは閉じており、末尾にQED記号 `□` を表示します。
+
+### 演習
+
+```tex
+\begin{kexercise}[title=演習: 混合項の強さを調べる,level=standard]
+問題文
+\end{kexercise}
+```
+
+演習問題用のボックスに変換されます。
+`level` は `basic`、`standard`、`advanced` を想定しており、`kexercise-basic` のようなCSS classが付きます。
+
+### ヒント
+
+```tex
+\begin{khint}[title=考え方]
+ヒント本文
+\end{khint}
+```
+
+ヒント用の折りたたみに変換されます。
+`title` を省略した場合のデフォルトタイトルは「ヒント」です。
+
+### 解答
+
+```tex
+\begin{kanswer}[title=解答例]
+解答本文
+\end{kanswer}
+```
+
+解答用の折りたたみに変換されます。
+`title` を省略した場合のデフォルトタイトルは「解答」です。
+
 ## サンプル題材
 
 `examples/sample.ktex` は「二次形式とヘッセ行列」を題材にしています。
@@ -66,7 +110,7 @@ f(x,y)=x^2+y^2+3xy
 ## 現在の制限
 
 - 完全なLaTeXパーサーではありません。
-- 対応しているのは、自作マクロ `kfold`、`kgap`、`kbox`、`kadvanced` と、簡単な見出しだけです。
+- 対応しているのは、自作マクロ `kfold`、`kgap`、`kbox`、`kadvanced`、`kproof`、`kexercise`、`khint`、`kanswer` と、簡単な見出しだけです。
 - MathJax本体はHTMLへ同梱していません。
 - 複雑なオプション構文や任意のLaTeX環境には未対応です。
 

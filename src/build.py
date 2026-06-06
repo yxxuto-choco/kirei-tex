@@ -8,7 +8,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-BEGIN_RE = re.compile(r"\\begin\{(kfold|kbox|kadvanced)\}(?:\[([^\]]*)\])?", re.DOTALL)
+KTEX_ENVS = "kfold|kbox|kadvanced|kproof|kexercise|khint|kanswer"
+BEGIN_RE = re.compile(rf"\\begin\{{({KTEX_ENVS})\}}(?:\[([^\]]*)\])?", re.DOTALL)
 
 
 def split_options(source: str) -> list[str]:
@@ -150,6 +151,38 @@ class Renderer:
                 "</aside>"
             )
 
+        if env == "kproof":
+            title = options.get("title", "証明")
+            return (
+                '<details class="kproof">\n'
+                f"  <summary>{self.render_inline(title)}</summary>\n"
+                f'  <div class="kproof-body">\n{inner_html}\n'
+                '    <div class="qed" aria-label="証明終わり">□</div>\n'
+                "  </div>\n"
+                "</details>"
+            )
+
+        if env == "kexercise":
+            level = slug_class(options.get("level", "standard"), fallback="standard")
+            title = options.get("title", "演習")
+            return (
+                f'<aside class="kexercise kexercise-{level}" data-level="{level}">\n'
+                '  <div class="kexercise-header">\n'
+                f'    <div class="kexercise-label">{self.render_inline(title)}</div>\n'
+                f'    <div class="kexercise-level">{self.render_inline(level)}</div>\n'
+                "  </div>\n"
+                f'  <div class="kexercise-body">\n{inner_html}\n  </div>\n'
+                "</aside>"
+            )
+
+        if env == "khint":
+            title = options.get("title", "ヒント")
+            return self.render_named_fold("khint", title, inner_html)
+
+        if env == "kanswer":
+            title = options.get("title", "解答")
+            return self.render_named_fold("kanswer", title, inner_html)
+
         if env == "kadvanced":
             return (
                 '<section class="kadvanced" data-advanced>\n'
@@ -159,6 +192,14 @@ class Renderer:
             )
 
         return inner_html
+
+    def render_named_fold(self, class_name: str, title: str, inner_html: str) -> str:
+        return (
+            f'<details class="{class_name}">\n'
+            f"  <summary>{self.render_inline(title)}</summary>\n"
+            f'  <div class="{class_name}-body">\n{inner_html}\n  </div>\n'
+            "</details>"
+        )
 
     def default_box_title(self, box_type: str) -> str:
         return {
