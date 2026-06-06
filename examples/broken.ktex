@@ -1,0 +1,25 @@
+\title{壊れたサンプル}
+\subtitle{エラーと警告の確認用}
+
+\section{重複ラベル}
+
+\begin{kbox}[type=theorem,title=最初の定理,label=thm:duplicate]
+これは最初の定理である。
+\end{kbox}
+
+\begin{kbox}[type=theorem,title=同じラベルの定理,label=thm:duplicate]
+同じ label を使っているのでエラーになる。
+\end{kbox}
+
+\section{警告の例}
+
+存在しない参照 \kref{thm:missing} は warning になる。
+
+\begin{kexercise}[title=不正なレベル,label=ex:bad-level,level=hard]
+`level=hard` は正式対応外なので、表示上は standard にフォールバックする。
+\end{kexercise}
+
+\section{閉じ忘れ}
+
+\begin{kbox}[type=theorem,title=閉じ忘れ,label=thm:unclosed]
+この kbox は閉じられていない。

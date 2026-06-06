@@ -4,13 +4,17 @@ import argparse
 import datetime as dt
 import html
 import re
-from dataclasses import dataclass
+import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 KTEX_ENVS = "kfold|kbox|kadvanced|kproof|kexercise|khint|kanswer"
+SUPPORTED_ENVS = set(KTEX_ENVS.split("|"))
 BEGIN_RE = re.compile(rf"\\begin\{{({KTEX_ENVS})\}}(?:\[([^\]]*)\])?", re.DOTALL)
+ANY_BEGIN_RE = re.compile(r"\\begin\{([^}]+)\}")
+KREF_RE = re.compile(r"\\kref\{([^{}]+)\}")
 NUMBERED_BOX_TYPES = {
     "theorem": "定理",
     "definition": "定義",
@@ -25,6 +29,7 @@ UNNUMBERED_BOX_TYPES = {
     "proof": "証明",
     "plain": "補足",
 }
+EXERCISE_LEVELS = {"basic", "standard", "advanced"}
 HEADING_LEVELS = {
     "section": 1,
     "subsection": 2,
@@ -35,6 +40,25 @@ HEADING_TAGS = {
     2: "h3",
     3: "h4",
 }
+
+
+@dataclass
+class BuildMessage:
+    kind: str
+    message: str
+    path: Path | None = None
+    line: int | None = None
+    column: int | None = None
+    snippet: str | None = None
+    notes: list[str] = field(default_factory=list)
+
+
+@dataclass
+class BuildOptions:
+    strict: bool = False
+    allow_output_on_error: bool = False
+    quiet: bool = False
+    check: bool = False
 
 
 @dataclass
@@ -54,13 +78,24 @@ class NumberedRecord:
 
     @property
     def ref_text(self) -> str:
+        if not self.number:
+            return self.kind
         return f"{self.kind} {self.number}"
 
     @property
     def label_text(self) -> str:
+        if not self.number:
+            return self.title or self.kind
         if self.title:
             return f"{self.kind} {self.number}（{self.title}）"
         return self.ref_text
+
+
+@dataclass
+class SourceLocation:
+    line: int
+    column: int
+    snippet: str
 
 
 def split_options(source: str) -> list[str]:
@@ -135,25 +170,71 @@ def write_text(path: Path, content: str) -> None:
 
 
 class Renderer:
-    def __init__(self) -> None:
+    def __init__(self, source_path: Path, options: BuildOptions | None = None) -> None:
+        self.source_path = source_path
+        self.options = options or BuildOptions()
+        self.source = ""
+        self.source_lines: list[str] = []
+        self.errors: list[BuildMessage] = []
+        self.warnings: list[BuildMessage] = []
         self.gap_index = 0
         self.section_counts = [0, 0, 0]
         self.block_count = 0
         self.heading_records: list[HeadingRecord] = []
         self.numbered_records: list[NumberedRecord] = []
         self.labels: dict[str, NumberedRecord] = {}
+        self.label_locations: dict[str, SourceLocation] = {}
         self._heading_cursor = 0
         self._numbered_cursor = 0
 
     def render_document(self, source: str) -> tuple[str, str, str, str]:
+        self.source = source
+        self.source_lines = source.splitlines()
         title = self.extract_command(source, "title") or "Kirei Book"
         subtitle = self.extract_command(source, "subtitle") or ""
         body = self.remove_metadata(source)
+        body_offset = source.find(body) if body else 0
 
-        self.collect_metadata(body)
+        self.collect_metadata(body, body_offset)
         toc = self.render_toc()
         self.reset_render_state()
         return title, subtitle, toc, self.render_blocks(body)
+
+    @property
+    def has_errors(self) -> bool:
+        return bool(self.errors)
+
+    def add_message(
+        self,
+        kind: str,
+        message: str,
+        index: int | None = None,
+        notes: list[str] | None = None,
+    ) -> None:
+        if kind == "warning" and self.options.strict:
+            kind = "error"
+
+        location = self.location_from_index(index) if index is not None else None
+        build_message = BuildMessage(
+            kind=kind,
+            message=message,
+            path=self.source_path,
+            line=location.line if location else None,
+            column=location.column if location else None,
+            snippet=location.snippet if location else None,
+            notes=notes or [],
+        )
+        if kind == "error":
+            self.errors.append(build_message)
+        else:
+            self.warnings.append(build_message)
+
+    def location_from_index(self, index: int) -> SourceLocation:
+        line = self.source.count("\n", 0, index) + 1
+        last_newline = self.source.rfind("\n", 0, index)
+        column = index + 1 if last_newline == -1 else index - last_newline
+        snippet = self.source_lines[line - 1] if 0 <= line - 1 < len(self.source_lines) else ""
+        return SourceLocation(line=line, column=column, snippet=snippet)
 
     def extract_command(self, source: str, name: str) -> str | None:
         match = re.search(rf"\\{name}\{{([^{{}}]*)\}}", source)
@@ -164,46 +245,107 @@ class Renderer:
         source = re.sub(r"\\subtitle\{[^{}]*\}\s*", "", source)
         return source.strip()
 
-    def collect_metadata(self, source: str) -> None:
+    def collect_metadata(self, source: str, base_offset: int = 0) -> None:
         self.section_counts = [0, 0, 0]
         self.block_count = 0
         self.heading_records = []
         self.numbered_records = []
         self.labels = {}
-        self.collect_blocks(source)
+        self.label_locations = {}
+        self.validate_unknown_envs(source, base_offset)
+        self.collect_blocks(source, base_offset)
+        self.validate_refs(source, base_offset)
 
-    def collect_blocks(self, source: str) -> None:
+    def mask_math(self, source: str) -> str:
+        output: list[str] = []
+        i = 0
+        while i < len(source):
+            delimiter = None
+            closer = None
+            if source.startswith(r"\[", i):
+                delimiter, closer = r"\[", r"\]"
+            elif source.startswith(r"\(", i):
+                delimiter, closer = r"\(", r"\)"
+            elif source.startswith("$$", i):
+                delimiter, closer = "$$", "$$"
+            elif source[i] == "$":
+                delimiter, closer = "$", "$"
+
+            if delimiter and closer:
+                end = self.find_math_end(source, i + len(delimiter), closer)
+                if end != -1:
+                    math_source = source[i : end + len(closer)]
+                    output.append("".join("\n" if char == "\n" else " " for char in math_source))
+                    i = end + len(closer)
+                    continue
+
+            output.append(source[i])
+            i += 1
+        return "".join(output)
+
+    def validate_unknown_envs(self, source: str, base_offset: int) -> None:
+        masked = self.mask_math(source)
+        for match in ANY_BEGIN_RE.finditer(masked):
+            env = match.group(1)
+            if env not in SUPPORTED_ENVS:
+                self.add_message(
+                    "warning",
+                    f"unsupported environment '{env}'",
+                    base_offset + match.start(),
+                )
+
+    def validate_refs(self, source: str, base_offset: int) -> None:
+        masked = self.mask_math(source)
+        for match in KREF_RE.finditer(masked):
+            label = match.group(1).strip()
+            if label not in self.labels:
+                self.add_message(
+                    "warning",
+                    f"unresolved reference '{label}'",
+                    base_offset + match.start(),
+                )
+
+    def collect_blocks(self, source: str, base_offset: int = 0) -> None:
         pos = 0
         while True:
             match = BEGIN_RE.search(source, pos)
             if not match:
-                self.collect_plain(source[pos:])
+                self.collect_plain(source[pos:], base_offset + pos)
                 break
 
-            self.collect_plain(source[pos : match.start()])
+            self.collect_plain(source[pos : match.start()], base_offset + pos)
             env = match.group(1)
             options = parse_options(match.group(2))
             end_span = self.find_env_end(source, env, match.end())
 
             if end_span is None:
-                self.collect_plain(source[match.start() :])
+                self.add_message(
+                    "error",
+                    f"unclosed environment '{env}'",
+                    base_offset + match.start(),
+                )
                 break
 
-            self.collect_env(env, options)
-            self.collect_blocks(source[match.end() : end_span[0]])
+            self.collect_env(env, options, base_offset + match.start())
+            self.collect_blocks(source[match.end() : end_span[0]], base_offset + match.end())
             pos = end_span[1]
 
-    def collect_plain(self, source: str) -> None:
+    def collect_plain(self, source: str, base_offset: int) -> None:
         source = source.strip()
         if not source:
             return
 
+        search_pos = 0
         for block in re.split(r"\n\s*\n", source):
+            block_start = source.find(block, search_pos)
+            if block_start == -1:
+                block_start = search_pos
             heading = self.parse_heading(block.strip())
             if heading:
                 self.register_heading(*heading)
+            search_pos = block_start + len(block)
 
-    def collect_env(self, env: str, options: dict[str, str]) -> None:
+    def collect_env(self, env: str, options: dict[str, str], start_index: int) -> None:
         if env == "kbox":
             box_type = slug_class(options.get("type", "plain"))
             if box_type in NUMBERED_BOX_TYPES:
@@ -212,13 +354,34 @@ class Renderer:
                     title=options.get("title", ""),
                     label=options.get("label"),
                     fallback_id=f"{box_type}-{len(self.numbered_records) + 1}",
+                    start_index=start_index,
+                )
+            elif options.get("label"):
+                label = options["label"]
+                self.register_label(
+                    label=label,
+                    record=NumberedRecord(
+                        kind=self.default_box_title(box_type),
+                        number="",
+                        title=options.get("title", ""),
+                        anchor=safe_html_id(label, fallback=f"{box_type}-box"),
+                    ),
+                    start_index=start_index,
                 )
         elif env == "kexercise":
+            level = options.get("level", "standard").strip()
+            if level and level not in EXERCISE_LEVELS:
+                self.add_message(
+                    "warning",
+                    f"unknown exercise level '{level}'; fallback to 'standard'",
+                    start_index,
+                )
             self.register_numbered(
                 kind="演習",
                 title=options.get("title", ""),
                 label=options.get("label"),
                 fallback_id=f"exercise-{len(self.numbered_records) + 1}",
+                start_index=start_index,
             )
 
     def register_heading(self, command: str, title: str) -> None:
@@ -234,15 +397,41 @@ class Renderer:
         anchor = "section-" + "-".join(number_parts)
         self.heading_records.append(HeadingRecord(level=level, number=number, title=title, anchor=anchor))
 
-    def register_numbered(self, kind: str, title: str, label: str | None, fallback_id: str) -> None:
+    def register_numbered(
+        self,
+        kind: str,
+        title: str,
+        label: str | None,
+        fallback_id: str,
+        start_index: int,
+    ) -> None:
         section_number = self.section_counts[0] or 0
         self.block_count += 1
         number = f"{section_number}.{self.block_count}"
         anchor = safe_html_id(label, fallback=fallback_id) if label else None
         record = NumberedRecord(kind=kind, number=number, title=title, anchor=anchor)
         self.numbered_records.append(record)
-        if label:
-            self.labels[label] = record
+        if not label:
+            return
+        self.register_label(label, record, start_index)
+
+    def register_label(self, label: str, record: NumberedRecord, start_index: int) -> None:
+        current_location = self.location_from_index(start_index)
+        if label in self.labels:
+            first_location = self.label_locations[label]
+            self.add_message(
+                "error",
+                f"duplicate label '{label}'",
+                start_index,
+                notes=[
+                    f"first defined at {self.source_path}:{first_location.line}:{first_location.column}",
+                    f"duplicated at {self.source_path}:{current_location.line}:{current_location.column}",
+                ],
+            )
+            return
+
+        self.labels[label] = record
+        self.label_locations[label] = current_location
 
     def reset_render_state(self) -> None:
         self.gap_index = 0
@@ -390,7 +579,9 @@ class Renderer:
         )
 
     def render_kexercise(self, options: dict[str, str], inner_html: str) -> str:
-        level = slug_class(options.get("level", "standard"), fallback="standard")
+        level = options.get("level", "standard").strip()
+        if level not in EXERCISE_LEVELS:
+            level = "standard"
         record = self.next_numbered_record()
         attrs = f' id="{html.escape(record.anchor)}"' if record.anchor else ""
         return (
@@ -455,7 +646,8 @@ class Renderer:
         record = self.next_heading_record()
         tag = HEADING_TAGS[record.level]
         title = self.render_inline(record.title)
-        return f'<{tag} id="{html.escape(record.anchor)}">{html.escape(record.number)}. {title}</{tag}>'
+        heading_prefix = f"{record.number}. " if record.level == 1 else f"{record.number} "
+        return f'<{tag} id="{html.escape(record.anchor)}">{html.escape(heading_prefix)}{title}</{tag}>'
 
     def render_inline(self, source: str, linebreaks: bool = False) -> str:
         protected, math_tokens = self.protect_math(source)
@@ -576,8 +768,9 @@ class Renderer:
         return f'<a class="kref" href="{href}">{text}</a>'
 
 
-def build(input_path: Path, output_path: Path) -> None:
-    renderer = Renderer()
+def build(input_path: Path, output_path: Path, options: BuildOptions | None = None) -> Renderer:
+    options = options or BuildOptions()
+    renderer = Renderer(input_path, options)
     title, subtitle, toc, content = renderer.render_document(read_text(input_path))
     template = read_text(ROOT / "templates" / "book.html")
     css = read_text(ROOT / "assets" / "kirei.css")
@@ -593,18 +786,75 @@ def build(input_path: Path, output_path: Path) -> None:
         .replace("{{ js }}", js)
         .replace("{{ generated_at }}", generated_at)
     )
-    write_text(output_path, html_output)
+
+    if not options.check and (not renderer.has_errors or options.allow_output_on_error):
+        write_text(output_path, html_output)
+
+    return renderer
 
 
-def main() -> None:
+def pluralize(count: int, singular: str, plural: str) -> str:
+    return singular if count == 1 else plural
+
+
+def format_summary(renderer: Renderer) -> str:
+    error_count = len(renderer.errors)
+    warning_count = len(renderer.warnings)
+    error_word = pluralize(error_count, "error", "errors")
+    warning_word = pluralize(warning_count, "warning", "warnings")
+    if error_count:
+        return f"Kirei TeX build failed with {error_count} {error_word}, {warning_count} {warning_word}."
+    if warning_count:
+        return f"Kirei TeX build completed with {warning_count} {warning_word}."
+    return "Kirei TeX build completed successfully."
+
+
+def format_message(message: BuildMessage) -> str:
+    lines = [f"{message.kind}: {message.message}"]
+    if message.path and message.line is not None and message.column is not None:
+        lines.append(f"  at {message.path}:{message.line}:{message.column}")
+    if message.line is not None and message.snippet:
+        lines.append(f"  {message.line} | {message.snippet}")
+    lines.extend(f"  {note}" for note in message.notes)
+    return "\n".join(lines)
+
+
+def print_report(renderer: Renderer, quiet: bool = False) -> None:
+    print(format_summary(renderer), file=sys.stderr)
+    messages: list[BuildMessage] = list(renderer.errors)
+    if not quiet:
+        messages.extend(renderer.warnings)
+    for message in messages:
+        print(file=sys.stderr)
+        print(format_message(message), file=sys.stderr)
+
+
+def main() -> int:
     parser = argparse.ArgumentParser(description="Build a single-file interactive math book from .ktex.")
     parser.add_argument("input", type=Path, help="Input .ktex file")
     parser.add_argument("output", type=Path, help="Output HTML file")
+    parser.add_argument("--strict", action="store_true", help="Treat warnings as errors")
+    parser.add_argument("--allow-output-on-error", action="store_true", help="Write HTML even if errors are found")
+    parser.add_argument("--quiet", action="store_true", help="Suppress warning details")
+    parser.add_argument("--check", action="store_true", help="Check syntax without writing HTML")
     args = parser.parse_args()
 
-    build(args.input, args.output)
-    print(f"built {args.output}")
+    options = BuildOptions(
+        strict=args.strict,
+        allow_output_on_error=args.allow_output_on_error,
+        quiet=args.quiet,
+        check=args.check,
+    )
+    renderer = build(args.input, args.output, options)
+    print_report(renderer, quiet=args.quiet)
+
+    if renderer.has_errors:
+        return 1
+
+    if not args.check:
+        print(f"built {args.output}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

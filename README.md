@@ -13,6 +13,54 @@ python src/build.py examples/sample.ktex dist/sample.html
 
 このMVPではCSSとJavaScriptをHTMLへインライン展開します。数式表示にはMathJax CDNを使うため、初回表示時はインターネット接続が必要です。
 
+### 構文チェック
+
+HTMLを出力せず、原稿の構文だけを確認できます。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --check
+```
+
+warning も error として扱いたい場合は `--strict` を付けます。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --strict
+```
+
+warning の詳細表示を抑えたい場合は `--quiet` を付けます。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --quiet
+```
+
+通常は error があるとHTMLを出力しません。
+壊れている箇所を画面上で確認したい場合だけ、`--allow-output-on-error` を使うと可能な範囲でHTMLを出力します。
+
+```powershell
+python src/build.py examples/broken.ktex dist/broken.html --allow-output-on-error
+```
+
+### warning と error
+
+`warning` はHTML出力を継続できる問題です。
+たとえば未解決の `\kref{...}` や、不正な `kexercise` の `level` が該当します。
+
+`error` はデフォルトではHTML出力を止める問題です。
+たとえば環境の閉じ忘れや、`label` の重複が該当します。
+
+よくある例:
+
+- `\end` の閉じ忘れ: `\begin{kbox}` に対応する `\end{kbox}` がない。
+- `label` 重複: 同じ `label=thm:hessian` を複数の `kbox` / `kexercise` で使っている。
+- 未解決 `\kref`: `\kref{thm:missing}` の参照先ラベルが存在しない。
+- 不正な `level`: `kexercise` の `level` は `basic`、`standard`、`advanced` のみ正式対応。
+
+エラー確認用のサンプルとして `examples/broken.ktex` があります。
+
+```powershell
+python src/build.py examples/broken.ktex dist/broken.html --check
+```
+
 ## 対応している記法
 
 ### 見出し番号と目次
@@ -152,8 +200,17 @@ f(x,y)=x^2+y^2+3xy
 - 対応しているのは、自作マクロ `kfold`、`kgap`、`kbox`、`kadvanced`、`kproof`、`kexercise`、`khint`、`kanswer`、`\kref` と、簡単な見出しだけです。
 - `label` 参照に対応しているのは、現在 `kbox` と `kexercise` です。
 - 番号付きボックスと演習は、章ごとの共有カウンタで番号付けされます。
+- 診断は簡易的な構文走査に基づくため、完全なLaTeX文法チェックではありません。
 - MathJax本体はHTMLへ同梱していません。
 - 複雑なオプション構文や任意のLaTeX環境には未対応です。
+
+## テスト
+
+Python標準ライブラリの `unittest` で簡易テストを実行できます。
+
+```powershell
+python -m unittest discover tests
+```
 
 ## 今後の拡張方針
 
