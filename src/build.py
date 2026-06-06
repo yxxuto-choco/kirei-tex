@@ -4,12 +4,63 @@ import argparse
 import datetime as dt
 import html
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 KTEX_ENVS = "kfold|kbox|kadvanced|kproof|kexercise|khint|kanswer"
 BEGIN_RE = re.compile(rf"\\begin\{{({KTEX_ENVS})\}}(?:\[([^\]]*)\])?", re.DOTALL)
+NUMBERED_BOX_TYPES = {
+    "theorem": "定理",
+    "definition": "定義",
+    "proposition": "命題",
+    "lemma": "補題",
+    "corollary": "系",
+    "example": "例",
+    "exercise": "演習",
+}
+UNNUMBERED_BOX_TYPES = {
+    "note": "注意",
+    "proof": "証明",
+    "plain": "補足",
+}
+HEADING_LEVELS = {
+    "section": 1,
+    "subsection": 2,
+    "subsubsection": 3,
+}
+HEADING_TAGS = {
+    1: "h2",
+    2: "h3",
+    3: "h4",
+}
+
+
+@dataclass
+class HeadingRecord:
+    level: int
+    number: str
+    title: str
+    anchor: str
+
+
+@dataclass
+class NumberedRecord:
+    kind: str
+    number: str
+    title: str
+    anchor: str | None
+
+    @property
+    def ref_text(self) -> str:
+        return f"{self.kind} {self.number}"
+
+    @property
+    def label_text(self) -> str:
+        if self.title:
+            return f"{self.kind} {self.number}（{self.title}）"
+        return self.ref_text
 
 
 def split_options(source: str) -> list[str]:
@@ -65,6 +116,15 @@ def slug_class(value: str, fallback: str = "plain") -> str:
     return slug or fallback
 
 
+def safe_html_id(value: str, fallback: str = "item") -> str:
+    safe = re.sub(r"[^a-zA-Z0-9_-]+", "-", value.strip()).strip("-")
+    if not safe:
+        safe = fallback
+    if safe[0].isdigit():
+        safe = f"{fallback}-{safe}"
+    return safe
+
+
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
@@ -77,12 +137,23 @@ def write_text(path: Path, content: str) -> None:
 class Renderer:
     def __init__(self) -> None:
         self.gap_index = 0
+        self.section_counts = [0, 0, 0]
+        self.block_count = 0
+        self.heading_records: list[HeadingRecord] = []
+        self.numbered_records: list[NumberedRecord] = []
+        self.labels: dict[str, NumberedRecord] = {}
+        self._heading_cursor = 0
+        self._numbered_cursor = 0
 
-    def render_document(self, source: str) -> tuple[str, str, str]:
+    def render_document(self, source: str) -> tuple[str, str, str, str]:
         title = self.extract_command(source, "title") or "Kirei Book"
         subtitle = self.extract_command(source, "subtitle") or ""
         body = self.remove_metadata(source)
-        return title, subtitle, self.render_blocks(body)
+
+        self.collect_metadata(body)
+        toc = self.render_toc()
+        self.reset_render_state()
+        return title, subtitle, toc, self.render_blocks(body)
 
     def extract_command(self, source: str, name: str) -> str | None:
         match = re.search(rf"\\{name}\{{([^{{}}]*)\}}", source)
@@ -92,6 +163,121 @@ class Renderer:
         source = re.sub(r"\\title\{[^{}]*\}\s*", "", source)
         source = re.sub(r"\\subtitle\{[^{}]*\}\s*", "", source)
         return source.strip()
+
+    def collect_metadata(self, source: str) -> None:
+        self.section_counts = [0, 0, 0]
+        self.block_count = 0
+        self.heading_records = []
+        self.numbered_records = []
+        self.labels = {}
+        self.collect_blocks(source)
+
+    def collect_blocks(self, source: str) -> None:
+        pos = 0
+        while True:
+            match = BEGIN_RE.search(source, pos)
+            if not match:
+                self.collect_plain(source[pos:])
+                break
+
+            self.collect_plain(source[pos : match.start()])
+            env = match.group(1)
+            options = parse_options(match.group(2))
+            end_span = self.find_env_end(source, env, match.end())
+
+            if end_span is None:
+                self.collect_plain(source[match.start() :])
+                break
+
+            self.collect_env(env, options)
+            self.collect_blocks(source[match.end() : end_span[0]])
+            pos = end_span[1]
+
+    def collect_plain(self, source: str) -> None:
+        source = source.strip()
+        if not source:
+            return
+
+        for block in re.split(r"\n\s*\n", source):
+            heading = self.parse_heading(block.strip())
+            if heading:
+                self.register_heading(*heading)
+
+    def collect_env(self, env: str, options: dict[str, str]) -> None:
+        if env == "kbox":
+            box_type = slug_class(options.get("type", "plain"))
+            if box_type in NUMBERED_BOX_TYPES:
+                self.register_numbered(
+                    kind=NUMBERED_BOX_TYPES[box_type],
+                    title=options.get("title", ""),
+                    label=options.get("label"),
+                    fallback_id=f"{box_type}-{len(self.numbered_records) + 1}",
+                )
+        elif env == "kexercise":
+            self.register_numbered(
+                kind="演習",
+                title=options.get("title", ""),
+                label=options.get("label"),
+                fallback_id=f"exercise-{len(self.numbered_records) + 1}",
+            )
+
+    def register_heading(self, command: str, title: str) -> None:
+        level = HEADING_LEVELS[command]
+        self.section_counts[level - 1] += 1
+        for index in range(level, len(self.section_counts)):
+            self.section_counts[index] = 0
+        if level == 1:
+            self.block_count = 0
+
+        number_parts = [str(value) for value in self.section_counts[:level] if value > 0]
+        number = ".".join(number_parts)
+        anchor = "section-" + "-".join(number_parts)
+        self.heading_records.append(HeadingRecord(level=level, number=number, title=title, anchor=anchor))
+
+    def register_numbered(self, kind: str, title: str, label: str | None, fallback_id: str) -> None:
+        section_number = self.section_counts[0] or 0
+        self.block_count += 1
+        number = f"{section_number}.{self.block_count}"
+        anchor = safe_html_id(label, fallback=fallback_id) if label else None
+        record = NumberedRecord(kind=kind, number=number, title=title, anchor=anchor)
+        self.numbered_records.append(record)
+        if label:
+            self.labels[label] = record
+
+    def reset_render_state(self) -> None:
+        self.gap_index = 0
+        self._heading_cursor = 0
+        self._numbered_cursor = 0
+
+    def render_toc(self) -> str:
+        if not self.heading_records:
+            return ""
+
+        items = []
+        for record in self.heading_records:
+            label = html.escape(f"{record.number} {record.title}")
+            items.append(
+                f'    <li class="ktoc-level-{record.level}">'
+                f'<a href="#{html.escape(record.anchor)}">{label}</a></li>'
+            )
+        return (
+            '<details class="ktoc" open>\n'
+            "  <summary>目次</summary>\n"
+            "  <ol>\n"
+            + "\n".join(items)
+            + "\n  </ol>\n"
+            "</details>"
+        )
+
+    def next_heading_record(self) -> HeadingRecord:
+        record = self.heading_records[self._heading_cursor]
+        self._heading_cursor += 1
+        return record
+
+    def next_numbered_record(self) -> NumberedRecord:
+        record = self.numbered_records[self._numbered_cursor]
+        self._numbered_cursor += 1
+        return record
 
     def render_blocks(self, source: str) -> str:
         chunks: list[str] = []
@@ -142,14 +328,7 @@ class Renderer:
             )
 
         if env == "kbox":
-            box_type = slug_class(options.get("type", "plain"))
-            title = options.get("title") or self.default_box_title(box_type)
-            return (
-                f'<aside class="kbox kbox-{box_type}">\n'
-                f'  <div class="kbox-label">{self.render_inline(title)}</div>\n'
-                f'  <div class="kbox-body">\n{inner_html}\n  </div>\n'
-                "</aside>"
-            )
+            return self.render_kbox(options, inner_html)
 
         if env == "kproof":
             title = options.get("title", "証明")
@@ -163,17 +342,7 @@ class Renderer:
             )
 
         if env == "kexercise":
-            level = slug_class(options.get("level", "standard"), fallback="standard")
-            title = options.get("title", "演習")
-            return (
-                f'<aside class="kexercise kexercise-{level}" data-level="{level}">\n'
-                '  <div class="kexercise-header">\n'
-                f'    <div class="kexercise-label">{self.render_inline(title)}</div>\n'
-                f'    <div class="kexercise-level">{self.render_inline(level)}</div>\n'
-                "  </div>\n"
-                f'  <div class="kexercise-body">\n{inner_html}\n  </div>\n'
-                "</aside>"
-            )
+            return self.render_kexercise(options, inner_html)
 
         if env == "khint":
             title = options.get("title", "ヒント")
@@ -193,6 +362,43 @@ class Renderer:
 
         return inner_html
 
+    def render_kbox(self, options: dict[str, str], inner_html: str) -> str:
+        box_type = slug_class(options.get("type", "plain"))
+        title = options.get("title", "")
+        label = options.get("label")
+        attrs = ""
+
+        if box_type in NUMBERED_BOX_TYPES:
+            record = self.next_numbered_record()
+            attrs = f' id="{html.escape(record.anchor)}"' if record.anchor else ""
+            label_html = self.render_inline(record.label_text)
+        else:
+            display_title = title or self.default_box_title(box_type)
+            anchor = safe_html_id(label, fallback=f"{box_type}-box") if label else None
+            attrs = f' id="{html.escape(anchor)}"' if anchor else ""
+            label_html = self.render_inline(display_title)
+
+        return (
+            f'<aside class="kbox kbox-{box_type}"{attrs}>\n'
+            f'  <div class="kbox-label">{label_html}</div>\n'
+            f'  <div class="kbox-body">\n{inner_html}\n  </div>\n'
+            "</aside>"
+        )
+
+    def render_kexercise(self, options: dict[str, str], inner_html: str) -> str:
+        level = slug_class(options.get("level", "standard"), fallback="standard")
+        record = self.next_numbered_record()
+        attrs = f' id="{html.escape(record.anchor)}"' if record.anchor else ""
+        return (
+            f'<aside class="kexercise kexercise-{level}" data-level="{level}"{attrs}>\n'
+            '  <div class="kexercise-header">\n'
+            f'    <div class="kexercise-label">{self.render_inline(record.label_text)}</div>\n'
+            f'    <div class="kexercise-level">{self.render_inline(level)}</div>\n'
+            "  </div>\n"
+            f'  <div class="kexercise-body">\n{inner_html}\n  </div>\n'
+            "</aside>"
+        )
+
     def render_named_fold(self, class_name: str, title: str, inner_html: str) -> str:
         return (
             f'<details class="{class_name}">\n'
@@ -202,12 +408,7 @@ class Renderer:
         )
 
     def default_box_title(self, box_type: str) -> str:
-        return {
-            "theorem": "定理",
-            "note": "注意",
-            "example": "例",
-            "proof": "証明",
-        }.get(box_type, "補足")
+        return NUMBERED_BOX_TYPES.get(box_type) or UNNUMBERED_BOX_TYPES.get(box_type, "補足")
 
     def render_plain(self, source: str) -> str:
         source = source.strip()
@@ -235,16 +436,26 @@ class Renderer:
 
         return "\n".join(rendered)
 
-    def render_heading(self, block: str) -> str | None:
-        for command, tag in (("section", "h2"), ("subsection", "h3"), ("subsubsection", "h4")):
+    def parse_heading(self, block: str) -> tuple[str, str] | None:
+        for command in HEADING_LEVELS:
             match = re.fullmatch(rf"\\{command}\{{([^{{}}]+)\}}", block, re.DOTALL)
             if match:
-                return f"<{tag}>{self.render_inline(match.group(1).strip())}</{tag}>"
+                return command, match.group(1).strip()
         return None
+
+    def render_heading(self, block: str) -> str | None:
+        parsed = self.parse_heading(block)
+        if not parsed:
+            return None
+
+        record = self.next_heading_record()
+        tag = HEADING_TAGS[record.level]
+        title = self.render_inline(record.title)
+        return f'<{tag} id="{html.escape(record.anchor)}">{html.escape(record.number)}. {title}</{tag}>'
 
     def render_inline(self, source: str, linebreaks: bool = False) -> str:
         protected, math_tokens = self.protect_math(source)
-        rendered = self.render_gaps(protected)
+        rendered = self.render_text_macros(protected)
         if linebreaks:
             rendered = rendered.replace("\n", "<br>\n")
         for placeholder, math_source in math_tokens:
@@ -294,27 +505,37 @@ class Renderer:
                 return end
             pos = end + len(closer)
 
-    def render_gaps(self, source: str) -> str:
+    def render_text_macros(self, source: str) -> str:
         output: list[str] = []
         pos = 0
-        macro = r"\kgap{"
 
-        while True:
-            start = source.find(macro, pos)
-            if start == -1:
+        while pos < len(source):
+            gap_start = source.find(r"\kgap{", pos)
+            ref_start = source.find(r"\kref{", pos)
+            candidates = [index for index in (gap_start, ref_start) if index != -1]
+            if not candidates:
                 output.append(html.escape(source[pos:]))
                 break
 
+            start = min(candidates)
             output.append(html.escape(source[pos:start]))
-            content_start = start + len(macro)
-            content_end = self.find_matching_brace(source, content_start - 1)
-            if content_end is None:
-                output.append(html.escape(source[start:]))
-                break
 
-            content = source[content_start:content_end]
-            output.append(self.render_gap(content))
-            pos = content_end + 1
+            if source.startswith(r"\kgap{", start):
+                content_start = start + len(r"\kgap{")
+                content_end = self.find_matching_brace(source, content_start - 1)
+                if content_end is None:
+                    output.append(html.escape(source[start:]))
+                    break
+                output.append(self.render_gap(source[content_start:content_end]))
+                pos = content_end + 1
+            else:
+                content_start = start + len(r"\kref{")
+                content_end = self.find_matching_brace(source, content_start - 1)
+                if content_end is None:
+                    output.append(html.escape(source[start:]))
+                    break
+                output.append(self.render_ref(source[content_start:content_end].strip()))
+                pos = content_end + 1
 
         return "".join(output)
 
@@ -333,7 +554,7 @@ class Renderer:
     def render_gap(self, content: str) -> str:
         self.gap_index += 1
         gap_id = f"kgap-{self.gap_index}"
-        body = html.escape(content).replace("\n", "<br>\n")
+        body = self.render_inline(content, linebreaks=True)
         return (
             f'<span class="kgap" data-kgap>'
             f'<button class="kgap-trigger" type="button" aria-expanded="false" '
@@ -342,10 +563,18 @@ class Renderer:
             f"</span>"
         )
 
+    def render_ref(self, label: str) -> str:
+        record = self.labels.get(label)
+        if not record or not record.anchor:
+            return '<span class="kref kref-missing">??</span>'
+        href = html.escape(f"#{record.anchor}")
+        text = html.escape(record.ref_text)
+        return f'<a class="kref" href="{href}">{text}</a>'
+
 
 def build(input_path: Path, output_path: Path) -> None:
     renderer = Renderer()
-    title, subtitle, content = renderer.render_document(read_text(input_path))
+    title, subtitle, toc, content = renderer.render_document(read_text(input_path))
     template = read_text(ROOT / "templates" / "book.html")
     css = read_text(ROOT / "assets" / "kirei.css")
     js = read_text(ROOT / "assets" / "kirei.js")
@@ -354,6 +583,7 @@ def build(input_path: Path, output_path: Path) -> None:
     html_output = (
         template.replace("{{ title }}", html.escape(title))
         .replace("{{ subtitle }}", html.escape(subtitle))
+        .replace("{{ toc }}", toc)
         .replace("{{ content }}", content)
         .replace("{{ css }}", css)
         .replace("{{ js }}", js)

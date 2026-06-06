@@ -15,6 +15,20 @@ python src/build.py examples/sample.ktex dist/sample.html
 
 ## 対応している記法
 
+### 見出し番号と目次
+
+```tex
+\section{二次形式を眺める}
+\subsection{二階微分による凸性判定}
+\subsubsection{方向微分で見る}
+```
+
+見出しは自動で `1. タイトル`、`1.1 タイトル`、`1.1.1 タイトル` のように番号付きで出力されます。
+各見出しには `section-1`、`section-1-1`、`section-1-1-1` のようなHTML `id` が付きます。
+
+HTML冒頭には `class="ktoc"` の自動目次が生成されます。
+目次は `details` / `summary` で表示され、デフォルトでは開いた状態です。
+
 ### 折りたたみ
 
 ```tex
@@ -36,12 +50,25 @@ HTMLの `<details>` / `<summary>` に変換されます。
 ### ボックス
 
 ```tex
-\begin{kbox}[type=theorem,title=二階微分可能な関数の凸性判定]
+\begin{kbox}[type=theorem,title=ヘッセ行列による凸性判定,label=thm:hessian]
 本文
 \end{kbox}
 ```
 
-`type` は `theorem`、`note`、`example` などを想定しています。
+`label` を付けると、そのボックスに安全なHTML `id` が付き、`\kref{...}` で参照できます。
+
+番号付きで扱う `type` は次の通りです。
+
+- `theorem`: 定理
+- `definition`: 定義
+- `proposition`: 命題
+- `lemma`: 補題
+- `corollary`: 系
+- `example`: 例
+- `exercise`: 演習
+
+`note` は番号なしの注意ボックスとして扱います。
+番号は章ごとにリセットされ、表示は `定理 1.1（ヘッセ行列による凸性判定）` のようになります。
 
 ### 発展トグル
 
@@ -67,13 +94,15 @@ HTMLの `<details>` / `<summary>` に変換されます。
 ### 演習
 
 ```tex
-\begin{kexercise}[title=演習: 混合項の強さを調べる,level=standard]
+\begin{kexercise}[title=混合項の強さ,label=ex:mixed-term,level=standard]
 問題文
 \end{kexercise}
 ```
 
 演習問題用のボックスに変換されます。
 `level` は `basic`、`standard`、`advanced` を想定しており、`kexercise-basic` のようなCSS classが付きます。
+`label` を付けるとHTML `id` が付き、`\kref{...}` で参照できます。
+表示は `演習 1.2（混合項の強さ）` のようになります。
 
 ### ヒント
 
@@ -97,6 +126,16 @@ HTMLの `<details>` / `<summary>` に変換されます。
 解答用の折りたたみに変換されます。
 `title` を省略した場合のデフォルトタイトルは「解答」です。
 
+### ラベル参照
+
+```tex
+\kref{thm:hessian} より、ヘッセ行列を調べればよい。
+```
+
+`\kref{...}` は、対応する `label` を持つ `kbox` または `kexercise` へのリンクに変換されます。
+表示文字列は `定理 1.1`、`例 1.2`、`演習 1.3` のようになります。
+存在しないラベルを参照した場合は、赤字の `??` として表示されます。
+
 ## サンプル題材
 
 `examples/sample.ktex` は「二次形式とヘッセ行列」を題材にしています。
@@ -110,15 +149,16 @@ f(x,y)=x^2+y^2+3xy
 ## 現在の制限
 
 - 完全なLaTeXパーサーではありません。
-- 対応しているのは、自作マクロ `kfold`、`kgap`、`kbox`、`kadvanced`、`kproof`、`kexercise`、`khint`、`kanswer` と、簡単な見出しだけです。
+- 対応しているのは、自作マクロ `kfold`、`kgap`、`kbox`、`kadvanced`、`kproof`、`kexercise`、`khint`、`kanswer`、`\kref` と、簡単な見出しだけです。
+- `label` 参照に対応しているのは、現在 `kbox` と `kexercise` です。
+- 番号付きボックスと演習は、章ごとの共有カウンタで番号付けされます。
 - MathJax本体はHTMLへ同梱していません。
 - 複雑なオプション構文や任意のLaTeX環境には未対応です。
 
 ## 今後の拡張方針
 
 1. `.ktex` の構文エラー位置をわかりやすく表示する。
-2. 目次、章番号、定理番号、参照 `\kref{...}` を追加する。
-3. `\kgap` を脚注風・余白注風・ポップアップ風から選べるようにする。
-4. MathJaxをローカル同梱できるビルドモードを追加する。
-5. 教材向けに演習、解答、ヒント段階表示のマクロを追加する。
-6. 最終的にLaTeXパッケージ化し、PDF向け出力とHTML向け出力を同じ原稿から分岐できるようにする。
+2. `\kgap` を脚注風・余白注風・ポップアップ風から選べるようにする。
+3. MathJaxをローカル同梱できるビルドモードを追加する。
+4. 段階ヒント機能を強化し、複数ヒントや表示順制御を扱えるようにする。
+5. 最終的にLaTeXパッケージ化し、PDF向け出力とHTML向け出力を同じ原稿から分岐できるようにする。

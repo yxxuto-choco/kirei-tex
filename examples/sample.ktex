@@ -10,7 +10,7 @@
 を考える。$x^2$ と $y^2$ の係数はどちらも正である。
 しかし、このことだけでは $f$ が凸であるとは限らない。\kgap{「平方の係数が正なら上に開いている」という一変数の直感を、そのまま二変数へ持ち込むと危ない。二変数では $xy$ のような混合項が曲がり方を変える。}
 
-\begin{kbox}[type=example,title=正の係数だけでは足りない]
+\begin{kbox}[type=example,title=正の係数だけでは足りない,label=ex:not-convex]
 $y=-x$ とおくと
 \[
   f(x,-x)=x^2+x^2-3x^2=-x^2
@@ -30,8 +30,11 @@ $y=-x$ とおくと
   \end{pmatrix}
 \]
 である。
+\kref{ex:not-convex} の現象は、ヘッセ行列の固有値を見るとすぐに説明できる。
 
-\begin{kbox}[type=theorem,title=二階微分可能な関数の凸性判定]
+\subsection{二階微分による凸性判定}
+
+\begin{kbox}[type=theorem,title=ヘッセ行列による凸性判定,label=thm:hessian]
 領域上で二階微分可能な関数 $f$ が凸であるためには、各点のヘッセ行列 $H_f$ が半正定値であることが必要である。
 さらに領域が凸で、すべての点で $H_f$ が半正定値なら、$f$ は凸である。\kgap{ここでは厳密な証明よりも、ヘッセ行列が「全方向の二階微分」をまとめている、という直感を大切にする。}
 \end{kbox}
@@ -64,6 +67,8 @@ $y=-x$ とおくと
 となり、その方向には下向きに曲がっている。
 \end{kfold}
 
+\kref{thm:hessian} を使えば、二次関数の凸性は係数の見た目ではなく行列の半正定値性として調べられる。
+
 \section{混合項の見方}
 
 一般の二次形式
@@ -85,7 +90,7 @@ $x^2$ と $y^2$ の係数 $a,c$ だけでなく、混合項の係数 $2b$ も行
 $a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生まれる。
 \end{kbox}
 
-\begin{kexercise}[title=演習: 混合項の強さを調べる,level=standard]
+\begin{kexercise}[title=混合項の強さ,label=ex:mixed-term,level=standard]
 二次形式
 \[
   q_t(x,y)=x^2+y^2+txy
@@ -112,6 +117,8 @@ $a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生
 が必要十分である。したがって $-2\le t\le 2$ である。
 \end{kanswer}
 \end{kexercise}
+
+\kref{ex:mixed-term} は、混合項がどの程度まで許されるかを自分の手で確かめるための練習である。
 
 \begin{kadvanced}
 \section{発展: 判別式で一瞬で見る}
