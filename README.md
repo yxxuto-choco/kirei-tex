@@ -28,7 +28,7 @@ python src/build.py examples/sample.ktex dist/sample-local.html --mathjax local
 ```
 
 local モードでは、デフォルトで `vendor/mathjax/tex-svg.js` を参照します。
-MathJax本体はこのリポジトリには同梱していないため、自分で配置してください。
+このリポジトリでは `vendor/mathjax/tex-svg.js` を同梱しているため、通常は追加配置なしで使えます。
 
 ```text
 vendor/
@@ -44,6 +44,7 @@ python src/build.py examples/sample.ktex dist/sample-local.html --mathjax local 
 ```
 
 数式がない文書や、すでに数式変換済みのHTMLを扱う場合は MathJax を読み込まない `none` を使えます。
+`none` では `$x^2$` のようなTeXソースは変換されず、そのまま表示されます。
 
 ```powershell
 python src/build.py examples/sample.ktex dist/sample-none.html --mathjax none
@@ -74,14 +75,14 @@ python src/build.py examples/sample.ktex dist/sample-external.html --assets exte
 python src/build.py examples/sample.ktex dist/sample-offline.html --offline
 ```
 
-ただし、完全オフラインで数式表示するには、事前に `vendor/mathjax/tex-svg.js` を配置する必要があります。
+完全オフラインで数式表示するため、このリポジトリには `vendor/mathjax/tex-svg.js` を同梱しています。
 現時点では MathJax 本体をHTMLへ完全インライン埋め込みする機能はありません。
 
 使い分けの目安:
 
 - 普段の確認: `--mathjax cdn --assets inline`
 - ネットなしで読む: `--offline`
-- 数式なし文書: `--mathjax none`
+- 数式なし文書、またはTeXをあえて変換しない確認: `--mathjax none`
 - 複数HTMLを同じ見た目で配る: `--assets external`
 
 ### 構文チェック
@@ -272,7 +273,7 @@ f(x,y)=x^2+y^2+3xy
 - `label` 参照に対応しているのは、現在 `kbox` と `kexercise` です。
 - 番号付きボックスと演習は、章ごとの共有カウンタで番号付けされます。
 - 診断は簡易的な構文走査に基づくため、完全なLaTeX文法チェックではありません。
-- MathJax本体はHTMLへ同梱していません。
+- MathJax本体は `vendor/mathjax/tex-svg.js` として同梱していますが、HTMLへ完全インライン埋め込みはしていません。
 - 複雑なオプション構文や任意のLaTeX環境には未対応です。
 
 ## テスト

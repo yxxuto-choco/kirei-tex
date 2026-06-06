@@ -116,6 +116,18 @@ class BuildTests(unittest.TestCase):
 
             self.assertFalse(renderer.errors)
             self.assertIn("vendor/mathjax/tex-svg.js", html)
+            self.assertFalse(renderer.warnings)
+
+    def test_mathjax_local_missing_file_warns(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "sample-local-missing.html"
+            renderer = build(
+                ROOT / "examples" / "sample.ktex",
+                output,
+                BuildOptions(mathjax_mode="local", mathjax_path=Path("vendor/mathjax/missing-tex-svg.js")),
+            )
+
+            self.assertFalse(renderer.errors)
             self.assertIn("local MathJax file not found", renderer.warnings[0].message)
 
     def test_offline_sets_local_mathjax_and_inline_assets(self) -> None:
