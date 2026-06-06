@@ -99,9 +99,36 @@ class NumberedRecord:
 
 @dataclass
 class SourceLocation:
+    path: Path
     line: int
     column: int
     snippet: str
+
+
+@dataclass
+class RefUse:
+    label: str
+    location: SourceLocation
+
+
+@dataclass
+class ChapterRecord:
+    number: int
+    title: str
+    anchor: str
+
+
+@dataclass
+class BookChapter:
+    path: Path
+    title: str
+
+
+@dataclass
+class BookManifest:
+    title: str
+    subtitle: str
+    chapters: list[BookChapter]
 
 
 def split_options(source: str) -> list[str]:
@@ -253,16 +280,21 @@ class Renderer:
         self.gap_index = 0
         self.section_counts = [0, 0, 0]
         self.block_count = 0
+        self.book_block_counts: dict[str, int] = {}
         self.heading_records: list[HeadingRecord] = []
+        self.chapter_records: list[ChapterRecord] = []
         self.numbered_records: list[NumberedRecord] = []
         self.labels: dict[str, NumberedRecord] = {}
         self.label_locations: dict[str, SourceLocation] = {}
+        self.ref_uses: list[RefUse] = []
+        self.book_mode = False
+        self.current_chapter = 0
         self._heading_cursor = 0
+        self._chapter_cursor = 0
         self._numbered_cursor = 0
 
     def render_document(self, source: str) -> tuple[str, str, str, str]:
-        self.source = source
-        self.source_lines = source.splitlines()
+        self.set_source_context(self.source_path, source)
         title = self.extract_command(source, "title") or "Kirei Book"
         subtitle = self.extract_command(source, "subtitle") or ""
         body = self.remove_metadata(source)
@@ -273,9 +305,63 @@ class Renderer:
         self.reset_render_state()
         return title, subtitle, toc, self.render_blocks(body)
 
+    def render_book(self, manifest: BookManifest) -> tuple[str, str, str, str]:
+        self.heading_records = []
+        self.chapter_records = []
+        self.numbered_records = []
+        self.labels = {}
+        self.label_locations = {}
+        self.ref_uses = []
+        self.book_mode = True
+
+        chapter_sources: list[tuple[int, BookChapter, str, str, int]] = []
+        for chapter_number, chapter in enumerate(manifest.chapters, start=1):
+            try:
+                chapter_source = read_text(chapter.path)
+            except OSError as exc:
+                self.set_source_context(chapter.path, "")
+                self.add_message("error", f"cannot read chapter '{chapter.path}': {exc}")
+                continue
+
+            self.set_source_context(chapter.path, chapter_source)
+            body = self.remove_metadata(chapter_source)
+            body_offset = chapter_source.find(body) if body else 0
+            chapter_sources.append((chapter_number, chapter, chapter_source, body, body_offset))
+
+            self.current_chapter = chapter_number
+            self.section_counts = [0, 0, 0]
+            self.block_count = 0
+            self.book_block_counts = {}
+            self.chapter_records.append(
+                ChapterRecord(number=chapter_number, title=chapter.title, anchor=f"chapter-{chapter_number}")
+            )
+            self.validate_unknown_envs(body, body_offset)
+            self.collect_blocks(body, body_offset)
+            self.collect_ref_uses(body, body_offset)
+
+        self.validate_ref_uses()
+        toc = self.render_toc()
+        self.reset_render_state()
+
+        rendered_chapters: list[str] = []
+        for chapter_number, _chapter, chapter_source, body, _body_offset in chapter_sources:
+            self.set_source_context(_chapter.path, chapter_source)
+            self.current_chapter = chapter_number
+            rendered_chapters.append(self.render_chapter_heading())
+            rendered_chapters.append(self.render_blocks(body))
+
+        return manifest.title, manifest.subtitle, toc, "\n\n".join(
+            chunk for chunk in rendered_chapters if chunk.strip()
+        )
+
     @property
     def has_errors(self) -> bool:
         return bool(self.errors)
+
+    def set_source_context(self, source_path: Path, source: str) -> None:
+        self.source_path = source_path
+        self.source = source
+        self.source_lines = source.splitlines()
 
     def add_message(
         self,
@@ -291,7 +377,7 @@ class Renderer:
         build_message = BuildMessage(
             kind=kind,
             message=message,
-            path=self.source_path,
+            path=location.path if location else self.source_path,
             line=location.line if location else None,
             column=location.column if location else None,
             snippet=location.snippet if location else None,
@@ -307,7 +393,7 @@ class Renderer:
         last_newline = self.source.rfind("\n", 0, index)
         column = index + 1 if last_newline == -1 else index - last_newline
         snippet = self.source_lines[line - 1] if 0 <= line - 1 < len(self.source_lines) else ""
-        return SourceLocation(line=line, column=column, snippet=snippet)
+        return SourceLocation(path=self.source_path, line=line, column=column, snippet=snippet)
 
     def extract_command(self, source: str, name: str) -> str | None:
         match = re.search(rf"\\{name}\{{([^{{}}]*)\}}", source)
@@ -321,13 +407,19 @@ class Renderer:
     def collect_metadata(self, source: str, base_offset: int = 0) -> None:
         self.section_counts = [0, 0, 0]
         self.block_count = 0
+        self.book_block_counts = {}
         self.heading_records = []
+        self.chapter_records = []
         self.numbered_records = []
         self.labels = {}
         self.label_locations = {}
+        self.ref_uses = []
+        self.book_mode = False
+        self.current_chapter = 0
         self.validate_unknown_envs(source, base_offset)
         self.collect_blocks(source, base_offset)
-        self.validate_refs(source, base_offset)
+        self.collect_ref_uses(source, base_offset)
+        self.validate_ref_uses()
 
     def mask_math(self, source: str) -> str:
         output: list[str] = []
@@ -367,16 +459,30 @@ class Renderer:
                     base_offset + match.start(),
                 )
 
-    def validate_refs(self, source: str, base_offset: int) -> None:
+    def collect_ref_uses(self, source: str, base_offset: int) -> None:
         masked = self.mask_math(source)
         for match in KREF_RE.finditer(masked):
             label = match.group(1).strip()
-            if label not in self.labels:
-                self.add_message(
-                    "warning",
-                    f"unresolved reference '{label}'",
-                    base_offset + match.start(),
-                )
+            location = self.location_from_index(base_offset + match.start())
+            self.ref_uses.append(RefUse(label=label, location=location))
+
+    def validate_ref_uses(self) -> None:
+        for ref_use in self.ref_uses:
+            if ref_use.label in self.labels:
+                continue
+            kind = "error" if self.options.strict else "warning"
+            build_message = BuildMessage(
+                kind=kind,
+                message=f"unresolved reference '{ref_use.label}'",
+                path=ref_use.location.path,
+                line=ref_use.location.line,
+                column=ref_use.location.column,
+                snippet=ref_use.location.snippet,
+            )
+            if kind == "error":
+                self.errors.append(build_message)
+            else:
+                self.warnings.append(build_message)
 
     def collect_blocks(self, source: str, base_offset: int = 0) -> None:
         pos = 0
@@ -462,10 +568,12 @@ class Renderer:
         self.section_counts[level - 1] += 1
         for index in range(level, len(self.section_counts)):
             self.section_counts[index] = 0
-        if level == 1:
+        if level == 1 and not self.book_mode:
             self.block_count = 0
 
         number_parts = [str(value) for value in self.section_counts[:level] if value > 0]
+        if self.book_mode:
+            number_parts = [str(self.current_chapter), *number_parts]
         number = ".".join(number_parts)
         anchor = "section-" + "-".join(number_parts)
         self.heading_records.append(HeadingRecord(level=level, number=number, title=title, anchor=anchor))
@@ -478,9 +586,13 @@ class Renderer:
         fallback_id: str,
         start_index: int,
     ) -> None:
-        section_number = self.section_counts[0] or 0
-        self.block_count += 1
-        number = f"{section_number}.{self.block_count}"
+        section_number = self.current_chapter if self.book_mode else (self.section_counts[0] or 0)
+        if self.book_mode:
+            self.book_block_counts[kind] = self.book_block_counts.get(kind, 0) + 1
+            number = f"{section_number}.{self.book_block_counts[kind]}"
+        else:
+            self.block_count += 1
+            number = f"{section_number}.{self.block_count}"
         anchor = safe_html_id(label, fallback=fallback_id) if label else None
         record = NumberedRecord(kind=kind, number=number, title=title, anchor=anchor)
         self.numbered_records.append(record)
@@ -497,8 +609,8 @@ class Renderer:
                 f"duplicate label '{label}'",
                 start_index,
                 notes=[
-                    f"first defined at {self.source_path}:{first_location.line}:{first_location.column}",
-                    f"duplicated at {self.source_path}:{current_location.line}:{current_location.column}",
+                    f"first defined at {first_location.path}:{first_location.line}:{first_location.column}",
+                    f"duplicated at {current_location.path}:{current_location.line}:{current_location.column}",
                 ],
             )
             return
@@ -509,19 +621,38 @@ class Renderer:
     def reset_render_state(self) -> None:
         self.gap_index = 0
         self._heading_cursor = 0
+        self._chapter_cursor = 0
         self._numbered_cursor = 0
 
     def render_toc(self) -> str:
-        if not self.heading_records:
+        if not self.heading_records and not self.chapter_records:
             return ""
 
         items = []
-        for record in self.heading_records:
-            label = html.escape(f"{record.number} {record.title}")
-            items.append(
-                f'    <li class="ktoc-level-{record.level}">'
-                f'<a href="#{html.escape(record.anchor)}">{label}</a></li>'
-            )
+        if self.book_mode:
+            heading_index = 0
+            for chapter in self.chapter_records:
+                chapter_label = html.escape(f"Chapter {chapter.number}: {chapter.title}")
+                items.append(
+                    f'    <li class="ktoc-chapter"><a href="#{html.escape(chapter.anchor)}">{chapter_label}</a></li>'
+                )
+                while heading_index < len(self.heading_records):
+                    record = self.heading_records[heading_index]
+                    if not record.number.startswith(f"{chapter.number}."):
+                        break
+                    label = html.escape(f"{record.number} {record.title}")
+                    items.append(
+                        f'    <li class="ktoc-level-{record.level} ktoc-in-chapter">'
+                        f'<a href="#{html.escape(record.anchor)}">{label}</a></li>'
+                    )
+                    heading_index += 1
+        else:
+            for record in self.heading_records:
+                label = html.escape(f"{record.number} {record.title}")
+                items.append(
+                    f'    <li class="ktoc-level-{record.level}">'
+                    f'<a href="#{html.escape(record.anchor)}">{label}</a></li>'
+                )
         return (
             '<details class="ktoc" open>\n'
             "  <summary>目次</summary>\n"
@@ -535,6 +666,20 @@ class Renderer:
         record = self.heading_records[self._heading_cursor]
         self._heading_cursor += 1
         return record
+
+    def next_chapter_record(self) -> ChapterRecord:
+        record = self.chapter_records[self._chapter_cursor]
+        self._chapter_cursor += 1
+        return record
+
+    def render_chapter_heading(self) -> str:
+        record = self.next_chapter_record()
+        return (
+            f'<section class="kchapter" id="{html.escape(record.anchor)}">\n'
+            f'  <div class="kchapter-kicker">Chapter {record.number}</div>\n'
+            f'  <h1>{html.escape(record.title)}</h1>\n'
+            "</section>"
+        )
 
     def next_numbered_record(self) -> NumberedRecord:
         record = self.numbered_records[self._numbered_cursor]
@@ -719,7 +864,7 @@ class Renderer:
         record = self.next_heading_record()
         tag = HEADING_TAGS[record.level]
         title = self.render_inline(record.title)
-        heading_prefix = f"{record.number}. " if record.level == 1 else f"{record.number} "
+        heading_prefix = f"{record.number} " if self.book_mode or record.level > 1 else f"{record.number}. "
         return f'<{tag} id="{html.escape(record.anchor)}">{html.escape(heading_prefix)}{title}</{tag}>'
 
     def render_inline(self, source: str, linebreaks: bool = False) -> str:
@@ -841,16 +986,138 @@ class Renderer:
         return f'<a class="kref" href="{href}">{text}</a>'
 
 
-def build(input_path: Path, output_path: Path, options: BuildOptions | None = None) -> Renderer:
-    options = normalize_options(options or BuildOptions())
-    renderer = Renderer(input_path, options)
-    title, subtitle, toc, content = renderer.render_document(read_text(input_path))
+def parse_manifest_value(line: str) -> str:
+    value = line.split(":", 1)[1].strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    return value
+
+
+def line_start_index(lines: list[str], line_number: int) -> int:
+    return sum(len(line) + 1 for line in lines[: max(0, line_number - 1)])
+
+
+def parse_book_manifest(manifest_path: Path, renderer: Renderer) -> BookManifest:
+    try:
+        source = read_text(manifest_path)
+    except OSError as exc:
+        renderer.set_source_context(manifest_path, "")
+        renderer.add_message("error", f"cannot read manifest '{manifest_path}': {exc}")
+        return BookManifest(title="", subtitle="", chapters=[])
+
+    renderer.set_source_context(manifest_path, source)
+    lines = source.splitlines()
+    title = ""
+    subtitle = ""
+    chapters: list[BookChapter] = []
+    in_chapters = False
+    current: dict[str, str] | None = None
+    current_line = 1
+
+    def finish_chapter() -> None:
+        nonlocal current, current_line
+        if current is None:
+            return
+        path_value = current.get("path", "").strip()
+        title_value = current.get("title", "").strip()
+        if not path_value:
+            renderer.add_message(
+                "error",
+                "invalid manifest chapter: missing path",
+                line_start_index(lines, current_line),
+            )
+        if not title_value:
+            renderer.add_message(
+                "error",
+                "invalid manifest chapter: missing title",
+                line_start_index(lines, current_line),
+            )
+        if path_value and title_value:
+            chapters.append(BookChapter(path=(manifest_path.parent / path_value).resolve(), title=title_value))
+        current = None
+
+    for line_number, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped == "chapters:":
+            in_chapters = True
+            continue
+
+        if not in_chapters:
+            if stripped.startswith("title:"):
+                title = parse_manifest_value(stripped)
+            elif stripped.startswith("subtitle:"):
+                subtitle = parse_manifest_value(stripped)
+            else:
+                renderer.add_message(
+                    "error",
+                    f"invalid manifest line: {stripped}",
+                    line_start_index(lines, line_number),
+                )
+            continue
+
+        if stripped.startswith("- "):
+            finish_chapter()
+            current = {}
+            current_line = line_number
+            stripped = stripped[2:].strip()
+            if stripped:
+                if ":" not in stripped:
+                    renderer.add_message(
+                        "error",
+                        f"invalid chapter entry: {stripped}",
+                        line_start_index(lines, line_number),
+                    )
+                else:
+                    key, _sep, _value = stripped.partition(":")
+                    current[key.strip()] = parse_manifest_value(stripped)
+            continue
+
+        if current is None:
+            renderer.add_message(
+                "error",
+                f"invalid manifest chapter line: {stripped}",
+                line_start_index(lines, line_number),
+            )
+            continue
+
+        if ":" not in stripped:
+            renderer.add_message(
+                "error",
+                f"invalid manifest chapter line: {stripped}",
+                line_start_index(lines, line_number),
+            )
+            continue
+        key, _sep, _value = stripped.partition(":")
+        current[key.strip()] = parse_manifest_value(stripped)
+
+    finish_chapter()
+
+    if not title:
+        renderer.add_message("error", "invalid manifest: missing title", 0)
+    if not chapters:
+        renderer.add_message("error", "invalid manifest: missing chapters", 0)
+
+    return BookManifest(title=title or "Kirei Book", subtitle=subtitle, chapters=chapters)
+
+
+def render_html_output(
+    renderer: Renderer,
+    title: str,
+    subtitle: str,
+    toc: str,
+    content: str,
+    output_path: Path,
+    options: BuildOptions,
+) -> str:
     template = read_text(ROOT / "templates" / "book.html")
     css_block, js_block = render_asset_blocks(output_path, options)
     mathjax_config, mathjax_script = render_mathjax_blocks(renderer, output_path, options)
     generated_at = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
 
-    html_output = (
+    return (
         template.replace("{{ title }}", html.escape(title))
         .replace("{{ subtitle }}", html.escape(subtitle))
         .replace("{{ toc }}", toc)
@@ -861,6 +1128,33 @@ def build(input_path: Path, output_path: Path, options: BuildOptions | None = No
         .replace("{{ js_block }}", js_block)
         .replace("{{ generated_at }}", generated_at)
     )
+
+
+def build(input_path: Path, output_path: Path, options: BuildOptions | None = None) -> Renderer:
+    options = normalize_options(options or BuildOptions())
+    renderer = Renderer(input_path, options)
+    title, subtitle, toc, content = renderer.render_document(read_text(input_path))
+    html_output = render_html_output(renderer, title, subtitle, toc, content, output_path, options)
+
+    if not options.check and (not renderer.has_errors or options.allow_output_on_error):
+        if options.assets_mode == "external":
+            copy_external_assets(output_path)
+        write_text(output_path, html_output)
+
+    return renderer
+
+
+def build_book(manifest_path: Path, output_path: Path, options: BuildOptions | None = None) -> Renderer:
+    options = normalize_options(options or BuildOptions())
+    renderer = Renderer(manifest_path, options)
+    manifest = parse_book_manifest(manifest_path, renderer)
+    title, subtitle, toc, content = renderer.render_book(manifest) if manifest.chapters else (
+        manifest.title,
+        manifest.subtitle,
+        "",
+        "",
+    )
+    html_output = render_html_output(renderer, title, subtitle, toc, content, output_path, options)
 
     if not options.check and (not renderer.has_errors or options.allow_output_on_error):
         if options.assets_mode == "external":
@@ -910,6 +1204,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Build a single-file interactive math book from .ktex.")
     parser.add_argument("input", type=Path, help="Input .ktex file")
     parser.add_argument("output", type=Path, help="Output HTML file")
+    parser.add_argument("--book", action="store_true", help="Treat input as a book manifest")
     parser.add_argument("--strict", action="store_true", help="Treat warnings as errors")
     parser.add_argument("--allow-output-on-error", action="store_true", help="Write HTML even if errors are found")
     parser.add_argument("--quiet", action="store_true", help="Suppress warning details")
@@ -939,7 +1234,7 @@ def main() -> int:
         assets_mode=args.assets,
         offline=args.offline,
     )
-    renderer = build(args.input, args.output, options)
+    renderer = build_book(args.input, args.output, options) if args.book else build(args.input, args.output, options)
     print_report(renderer, quiet=args.quiet)
 
     if renderer.has_errors:

@@ -1,153 +1,70 @@
 # Kirei TeX HTML Prototype
 
-日本語数学教材向けの「1ファイル型インタラクティブ数学書」MVPです。
-LaTeX風の `.ktex` 原稿から、ローカルで直接開ける単一HTMLを生成します。
+日本語数学教材向けの `.ktex` から、ローカルで読めるHTMLを生成するプロトタイプです。LaTeX風の原稿に、折りたたみ、注釈、定理ボックス、演習、参照、目次を加えて、数学ノートとして読める形に変換します。
 
 ## 使い方
+
+単一ファイルをビルドする場合:
 
 ```powershell
 python src/build.py examples/sample.ktex dist/sample.html
 ```
 
-生成後、`dist/sample.html` をブラウザで開きます。
-
-このMVPではCSSとJavaScriptをHTMLへインライン展開します。数式表示にはMathJax CDNを使うため、初回表示時はインターネット接続が必要です。
-
-### MathJax の読み込みモード
-
-通常は CDN モードで十分です。
+複数章の book manifest をビルドする場合:
 
 ```powershell
-python src/build.py examples/sample.ktex dist/sample.html --mathjax cdn
+python src/build.py --book examples/book.kirei.yml dist/book.html
 ```
 
-ネットワークなしで読む教材にしたい場合は local モードを使います。
+生成されたHTMLはブラウザで直接開けます。Webサーバーは不要です。
 
-```powershell
-python src/build.py examples/sample.ktex dist/sample-local.html --mathjax local
+## Book Mode
+
+`--book` を付けると、入力ファイルを `.kirei.yml` manifest として読みます。
+
+```yaml
+title: Kirei TeX 数学ノート
+subtitle: 折りたたみと注釈で読む日本語数学教材
+chapters:
+  - path: chapters/01-quadratic-hessian.ktex
+    title: 二次形式とヘッセ行列
+  - path: chapters/02-eigen-svd-information.ktex
+    title: 固有値分解・特異値分解と情報量（自由度）
 ```
 
-local モードでは、デフォルトで `vendor/mathjax/tex-svg.js` を参照します。
-このリポジトリでは `vendor/mathjax/tex-svg.js` を同梱しているため、通常は追加配置なしで使えます。
+`chapters[].path` は manifest ファイルからの相対パスとして解決されます。外部YAMLライブラリは使わず、`title`、`subtitle`、`chapters`、各章の `path` / `title` だけを読む簡易パーサーです。
 
-```text
-vendor/
-  mathjax/
-    tex-svg.js
-```
+`examples/book.kirei.yml` には、次の2章を収録しています。
 
-別の場所に置く場合は `--mathjax-path` で指定できます。
-HTML内には、出力HTMLから見た相対パスで埋め込まれます。
+- 第1章: 二次形式とヘッセ行列
+- 第2章: 固有値分解・特異値分解と情報量（自由度）
 
-```powershell
-python src/build.py examples/sample.ktex dist/sample-local.html --mathjax local --mathjax-path vendor/mathjax/tex-svg.js
-```
+第2章は第1章の補論ではなく、線形代数・次元圧縮・情報量を扱う独立した別話題の章です。
 
-数式がない文書や、すでに数式変換済みのHTMLを扱う場合は MathJax を読み込まない `none` を使えます。
-`none` では `$x^2$` のようなTeXソースは変換されず、そのまま表示されます。
+## 番号体系
 
-```powershell
-python src/build.py examples/sample.ktex dist/sample-none.html --mathjax none
-```
+単一ファイル mode では、従来通り `\section` を基準に番号が付きます。
 
-### Assets の出力モード
+book mode では chapter を基準に番号が付きます。
 
-デフォルトは `inline` です。
-CSSとKirei TeX用JavaScriptをHTMLに埋め込むため、HTMLファイル単体に近い形で扱えます。
+- chapter: `chapter-1`, `chapter-2`
+- section: `1.1`, `1.2`, `2.1`
+- subsection: `1.1.1`, `2.1.1`
+- theorem / definition / proposition / lemma / corollary / example / exercise: `定理 1.1`, `例 1.1`, `演習 2.1`
 
-```powershell
-python src/build.py examples/sample.ktex dist/sample.html --assets inline
-```
+book mode の label と `\kref{...}` は章をまたいで参照できます。同じ label が別章に重複している場合は error になります。
 
-`external` を使うと、`dist/assets/kirei.css` と `dist/assets/kirei.js` にコピーし、HTMLから相対パスで読み込みます。
-複数HTMLで同じCSS/JSを共有したい場合に向いています。
+## 対応記法
 
-```powershell
-python src/build.py examples/sample.ktex dist/sample-external.html --assets external
-```
-
-### オフライン向けビルド
-
-人に配る教材や、ネットがない場所で読む教材には `--offline` を使います。
-これは `--mathjax local --assets inline` と同じ扱いです。
-
-```powershell
-python src/build.py examples/sample.ktex dist/sample-offline.html --offline
-```
-
-完全オフラインで数式表示するため、このリポジトリには `vendor/mathjax/tex-svg.js` を同梱しています。
-現時点では MathJax 本体をHTMLへ完全インライン埋め込みする機能はありません。
-
-使い分けの目安:
-
-- 普段の確認: `--mathjax cdn --assets inline`
-- ネットなしで読む: `--offline`
-- 数式なし文書、またはTeXをあえて変換しない確認: `--mathjax none`
-- 複数HTMLを同じ見た目で配る: `--assets external`
-
-### 構文チェック
-
-HTMLを出力せず、原稿の構文だけを確認できます。
-
-```powershell
-python src/build.py examples/sample.ktex dist/sample.html --check
-```
-
-warning も error として扱いたい場合は `--strict` を付けます。
-
-```powershell
-python src/build.py examples/sample.ktex dist/sample.html --strict
-```
-
-warning の詳細表示を抑えたい場合は `--quiet` を付けます。
-
-```powershell
-python src/build.py examples/sample.ktex dist/sample.html --quiet
-```
-
-通常は error があるとHTMLを出力しません。
-壊れている箇所を画面上で確認したい場合だけ、`--allow-output-on-error` を使うと可能な範囲でHTMLを出力します。
-
-```powershell
-python src/build.py examples/broken.ktex dist/broken.html --allow-output-on-error
-```
-
-### warning と error
-
-`warning` はHTML出力を継続できる問題です。
-たとえば未解決の `\kref{...}` や、不正な `kexercise` の `level` が該当します。
-
-`error` はデフォルトではHTML出力を止める問題です。
-たとえば環境の閉じ忘れや、`label` の重複が該当します。
-
-よくある例:
-
-- `\end` の閉じ忘れ: `\begin{kbox}` に対応する `\end{kbox}` がない。
-- `label` 重複: 同じ `label=thm:hessian` を複数の `kbox` / `kexercise` で使っている。
-- 未解決 `\kref`: `\kref{thm:missing}` の参照先ラベルが存在しない。
-- 不正な `level`: `kexercise` の `level` は `basic`、`standard`、`advanced` のみ正式対応。
-
-エラー確認用のサンプルとして `examples/broken.ktex` があります。
-
-```powershell
-python src/build.py examples/broken.ktex dist/broken.html --check
-```
-
-## 対応している記法
-
-### 見出し番号と目次
+### 見出し
 
 ```tex
-\section{二次形式を眺める}
-\subsection{二階微分による凸性判定}
-\subsubsection{方向微分で見る}
+\section{タイトル}
+\subsection{タイトル}
+\subsubsection{タイトル}
 ```
 
-見出しは自動で `1. タイトル`、`1.1 タイトル`、`1.1.1 タイトル` のように番号付きで出力されます。
-各見出しには `section-1`、`section-1-1`、`section-1-1-1` のようなHTML `id` が付きます。
-
-HTML冒頭には `class="ktoc"` の自動目次が生成されます。
-目次は `details` / `summary` で表示され、デフォルトでは開いた状態です。
+見出しには自動番号とHTML `id` が付き、本文冒頭に `class="ktoc"` の自動目次が生成されます。book mode では目次に chapter も表示されます。
 
 ### 折りたたみ
 
@@ -157,15 +74,13 @@ HTML冒頭には `class="ktoc"` の自動目次が生成されます。
 \end{kfold}
 ```
 
-HTMLの `<details>` / `<summary>` に変換されます。
-
 ### 注釈
 
 ```tex
-本文中に \kgap{補足説明} を置けます。
+本文中に \kgap{短い補足説明} を置けます。
 ```
 
-本文中の小さな `?` ボタンになり、クリックまたはタップで注釈を表示します。
+小さな `?` ボタンとして表示され、クリックまたはタップで注釈が開きます。
 
 ### ボックス
 
@@ -175,9 +90,7 @@ HTMLの `<details>` / `<summary>` に変換されます。
 \end{kbox}
 ```
 
-`label` を付けると、そのボックスに安全なHTML `id` が付き、`\kref{...}` で参照できます。
-
-番号付きで扱う `type` は次の通りです。
+対応している `type`:
 
 - `theorem`: 定理
 - `definition`: 定義
@@ -185,20 +98,9 @@ HTMLの `<details>` / `<summary>` に変換されます。
 - `lemma`: 補題
 - `corollary`: 系
 - `example`: 例
-- `exercise`: 演習
+- `note`: 注意（番号なし）
 
-`note` は番号なしの注意ボックスとして扱います。
-番号は章ごとにリセットされ、表示は `定理 1.1（ヘッセ行列による凸性判定）` のようになります。
-
-### 発展トグル
-
-```tex
-\begin{kadvanced}
-発展的な本文
-\end{kadvanced}
-```
-
-画面上部の「発展を表示」トグルで表示・非表示を切り替えます。
+`label` を付けるとHTML `id` が付き、`\kref{...}` で参照できます。
 
 ### 証明
 
@@ -208,86 +110,177 @@ HTMLの `<details>` / `<summary>` に変換されます。
 \end{kproof}
 ```
 
-「証明」というラベル付きの折りたたみボックスに変換されます。
-デフォルトでは閉じており、末尾にQED記号 `□` を表示します。
+「証明」という折りたたみとして表示され、末尾に QED 記号が付きます。デフォルトでは閉じています。
 
-### 演習
+### 演習・ヒント・解答
 
 ```tex
 \begin{kexercise}[title=混合項の強さ,label=ex:mixed-term,level=standard]
 問題文
+
+\begin{khint}
+ヒント本文
+\end{khint}
+
+\begin{kanswer}
+解答本文
+\end{kanswer}
 \end{kexercise}
 ```
 
-演習問題用のボックスに変換されます。
-`level` は `basic`、`standard`、`advanced` を想定しており、`kexercise-basic` のようなCSS classが付きます。
-`label` を付けるとHTML `id` が付き、`\kref{...}` で参照できます。
-表示は `演習 1.2（混合項の強さ）` のようになります。
+`level` は `basic`、`standard`、`advanced` に対応しています。不明な値は warning になり、表示上は `standard` として扱われます。
 
-### ヒント
+### 発展
 
 ```tex
-\begin{khint}[title=考え方]
-ヒント本文
-\end{khint}
+\begin{kadvanced}
+発展的な本文
+\end{kadvanced}
 ```
 
-ヒント用の折りたたみに変換されます。
-`title` を省略した場合のデフォルトタイトルは「ヒント」です。
+画面上部のトグルで表示/非表示を切り替えます。非表示時も「発展内容があります」という案内カードを残します。
 
-### 解答
+### 参照
 
 ```tex
-\begin{kanswer}[title=解答例]
-解答本文
-\end{kanswer}
+第1章の \kref{thm:hessian} を使う。
 ```
 
-解答用の折りたたみに変換されます。
-`title` を省略した場合のデフォルトタイトルは「解答」です。
+存在する label はリンクに変換されます。存在しない label はHTML上では `??` と表示され、CLIでは warning になります。`--strict` では error になります。
 
-### ラベル参照
+## MathJax
 
-```tex
-\kref{thm:hessian} より、ヘッセ行列を調べればよい。
+デフォルトは CDN mode です。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --mathjax cdn
 ```
 
-`\kref{...}` は、対応する `label` を持つ `kbox` または `kexercise` へのリンクに変換されます。
-表示文字列は `定理 1.1`、`例 1.2`、`演習 1.3` のようになります。
-存在しないラベルを参照した場合は、赤字の `??` として表示されます。
+ローカルの MathJax を使う場合:
 
-## サンプル題材
-
-`examples/sample.ktex` は「二次形式とヘッセ行列」を題材にしています。
-
-```tex
-f(x,y)=x^2+y^2+3xy
+```powershell
+python src/build.py examples/sample.ktex dist/sample-local.html --mathjax local
 ```
 
-のように、`x^2` と `y^2` の係数が正でも、混合項によって凸でなくなる例を扱っています。
+デフォルトでは次の配置を参照します。
 
-## 現在の制限
+```text
+vendor/
+  mathjax/
+    tex-svg.js
+```
 
-- 完全なLaTeXパーサーではありません。
-- 対応しているのは、自作マクロ `kfold`、`kgap`、`kbox`、`kadvanced`、`kproof`、`kexercise`、`khint`、`kanswer`、`\kref` と、簡単な見出しだけです。
-- `label` 参照に対応しているのは、現在 `kbox` と `kexercise` です。
-- 番号付きボックスと演習は、章ごとの共有カウンタで番号付けされます。
-- 診断は簡易的な構文走査に基づくため、完全なLaTeX文法チェックではありません。
-- MathJax本体は `vendor/mathjax/tex-svg.js` として同梱していますが、HTMLへ完全インライン埋め込みはしていません。
-- 複雑なオプション構文や任意のLaTeX環境には未対応です。
+別の場所に置く場合は `--mathjax-path` を使います。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample-local.html --mathjax local --mathjax-path vendor/mathjax/tex-svg.js
+```
+
+MathJaxを読み込まない場合:
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample-none.html --mathjax none
+```
+
+`none` では `$x^2$` のようなTeXソースは変換されません。数式なし文書、または既に数式変換済みのHTML向けです。
+
+## Assets
+
+CSS/JS はデフォルトでHTMLにインライン展開されます。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --assets inline
+```
+
+外部ファイルとして出力する場合:
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample-external.html --assets external
+```
+
+この場合、`dist/assets/kirei.css` と `dist/assets/kirei.js` がコピーされ、HTMLから相対パスで読み込まれます。
+
+## Offline
+
+ネット接続なしで読む構成に近づける場合は `--offline` を使います。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample-offline.html --offline
+python src/build.py --book examples/book.kirei.yml dist/book-offline.html --offline
+```
+
+`--offline` は次と同じ扱いです。
+
+```text
+--mathjax local --assets inline
+```
+
+注意: 現時点ではMathJax本体をHTMLへ完全インライン埋め込みしていません。完全オフラインで数式を表示するには、`vendor/mathjax/tex-svg.js` を事前に配置してください。
+
+## 構文チェックと診断
+
+HTMLを出力せずにチェックする場合:
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --check
+python src/build.py --book examples/book.kirei.yml dist/book.html --check
+```
+
+warning も error として扱う場合:
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --strict
+```
+
+warning の詳細表示を抑える場合:
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --quiet
+```
+
+error があっても可能な範囲でHTMLを出したい場合:
+
+```powershell
+python src/build.py examples/broken.ktex dist/broken.html --allow-output-on-error
+```
+
+warning はHTML出力を続けられる問題、error はデフォルトではHTML出力を止める問題です。
+
+よくある診断:
+
+- `\end` の閉じ忘れ
+- 未対応の `\begin{...}`
+- `label` の重複
+- 未解決の `\kref{...}`
+- 不正な `kexercise` の `level`
+- 不正な book manifest
+
+壊れたサンプルは `examples/broken.ktex` です。
+
+```powershell
+python src/build.py examples/broken.ktex dist/broken.html --check
+```
 
 ## テスト
 
-Python標準ライブラリの `unittest` で簡易テストを実行できます。
+Python標準ライブラリの `unittest` で実行できます。
 
 ```powershell
 python -m unittest discover tests
 ```
 
+## 現在の制限
+
+- 完全なLaTeXパーサーではありません。
+- 対応しているのは、Kirei TeX 独自マクロと簡易的な見出しです。
+- `label` 参照に対応しているのは、現在 `kbox` と `kexercise` です。
+- manifest パーサーは簡易YAML風で、複雑なYAML構文には対応していません。
+- MathJax本体は `vendor/mathjax/tex-svg.js` として配置できますが、HTMLへの完全インライン埋め込みは未対応です。
+
 ## 今後の拡張方針
 
 1. より高度な構文診断・修復提案を追加する。
-2. `\kgap` を脚注風・余白注風・ポップアップ風から選べるようにする。
+2. `\kgap` を脚注風・傍注風・ポップアップ風から選べるようにする。
 3. MathJax本体の取得・配置を支援するセットアップコマンドを追加する。
 4. 段階ヒント機能を強化し、複数ヒントや表示順制御を扱えるようにする。
-5. 最終的にLaTeXパッケージ化し、PDF向け出力とHTML向け出力を同じ原稿から分岐できるようにする。
+5. 最終的にLaTeXパッケージ化し、PDF向け出力とHTML向け出力を同じ原稿から切り替えられるようにする。

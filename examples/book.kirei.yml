@@ -1,0 +1,7 @@
+title: Kirei TeX 数学ノート
+subtitle: 折りたたみと注釈で読む日本語数学教材
+chapters:
+  - path: chapters/01-quadratic-hessian.ktex
+    title: 二次形式とヘッセ行列
+  - path: chapters/02-eigen-svd-information.ktex
+    title: 固有値分解・特異値分解と情報量（自由度）

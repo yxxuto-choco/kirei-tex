@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from src.build import BuildOptions, build
+from src.build import BuildOptions, build, build_book
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -157,6 +157,99 @@ class BuildTests(unittest.TestCase):
             self.assertIn('src="assets/kirei.js"', html)
             self.assertTrue((Path(temp_dir) / "assets" / "kirei.css").exists())
             self.assertTrue((Path(temp_dir) / "assets" / "kirei.js").exists())
+
+    def test_book_manifest_builds_successfully(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "book.html"
+            renderer = build_book(ROOT / "examples" / "book.kirei.yml", output, BuildOptions())
+            html = output.read_text(encoding="utf-8")
+
+            self.assertFalse(renderer.errors)
+            self.assertFalse(renderer.warnings)
+            self.assertIn('class="kchapter"', html)
+            self.assertIn('id="chapter-1"', html)
+            self.assertIn('id="chapter-2"', html)
+
+    def test_book_toc_and_chapter_titles_are_rendered(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "book.html"
+            renderer = build_book(ROOT / "examples" / "book.kirei.yml", output, BuildOptions())
+            html = output.read_text(encoding="utf-8")
+
+            self.assertFalse(renderer.errors)
+            self.assertIn("ktoc-chapter", html)
+            self.assertIn("二次形式とヘッセ行列", html)
+            self.assertIn("固有値分解・特異値分解と情報量", html)
+            self.assertNotIn("補論", html)
+
+    def test_book_cross_chapter_reference_is_linked(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "book.html"
+            renderer = build_book(ROOT / "examples" / "book.kirei.yml", output, BuildOptions())
+            html = output.read_text(encoding="utf-8")
+
+            self.assertFalse(renderer.errors)
+            self.assertIn('href="#thm-hessian"', html)
+            self.assertIn(">定理 1.1</a>", html)
+
+    def test_book_duplicate_label_across_chapters_is_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_root = Path(temp_dir)
+            manifest = temp_root / "book.kirei.yml"
+            chapter_a = temp_root / "a.ktex"
+            chapter_b = temp_root / "b.ktex"
+            output = temp_root / "book.html"
+            manifest.write_text(
+                "title: Duplicate Test\n"
+                "subtitle: Test\n"
+                "chapters:\n"
+                "  - path: a.ktex\n"
+                "    title: A\n"
+                "  - path: b.ktex\n"
+                "    title: B\n",
+                encoding="utf-8",
+            )
+            chapter_a.write_text(
+                "\\section{A}\n"
+                "\\begin{kbox}[type=theorem,title=A,label=dup:label]\nA\n\\end{kbox}\n",
+                encoding="utf-8",
+            )
+            chapter_b.write_text(
+                "\\section{B}\n"
+                "\\begin{kbox}[type=theorem,title=B,label=dup:label]\nB\n\\end{kbox}\n",
+                encoding="utf-8",
+            )
+
+            renderer = build_book(manifest, output, BuildOptions(check=True))
+
+            self.assertTrue(renderer.errors)
+            self.assertIn("duplicate label 'dup:label'", renderer.errors[0].message)
+
+    def test_book_offline_uses_local_mathjax(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "book-offline.html"
+            renderer = build_book(ROOT / "examples" / "book.kirei.yml", output, BuildOptions(offline=True))
+            html = output.read_text(encoding="utf-8")
+
+            self.assertFalse(renderer.errors)
+            self.assertIn("vendor/mathjax/tex-svg.js", html)
+            self.assertIn("<style>", html)
+
+    def test_invalid_manifest_is_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = Path(temp_dir) / "bad.kirei.yml"
+            output = Path(temp_dir) / "bad.html"
+            manifest.write_text(
+                "title: Bad Book\n"
+                "chapters:\n"
+                "  - title: Missing Path\n",
+                encoding="utf-8",
+            )
+
+            renderer = build_book(manifest, output, BuildOptions(check=True))
+
+            self.assertTrue(renderer.errors)
+            self.assertIn("invalid manifest chapter: missing path", "\n".join(error.message for error in renderer.errors))
 
 
 if __name__ == "__main__":
