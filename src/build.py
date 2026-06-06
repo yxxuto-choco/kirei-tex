@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import html
+import os
 import re
+import shutil
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -59,6 +61,10 @@ class BuildOptions:
     allow_output_on_error: bool = False
     quiet: bool = False
     check: bool = False
+    mathjax_mode: str = "cdn"
+    mathjax_path: Path = Path("vendor/mathjax/tex-svg.js")
+    assets_mode: str = "inline"
+    offline: bool = False
 
 
 @dataclass
@@ -167,6 +173,73 @@ def read_text(path: Path) -> str:
 def write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def normalize_options(options: BuildOptions) -> BuildOptions:
+    if options.offline:
+        options.mathjax_mode = "local"
+        options.assets_mode = "inline"
+    return options
+
+
+def html_relpath(target: Path, start: Path) -> str:
+    return os.path.relpath(target.resolve(), start.resolve()).replace(os.sep, "/")
+
+
+def render_mathjax_config() -> str:
+    return """<script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["$", "$"], ["\\\\(", "\\\\)"]],
+        displayMath: [["\\\\[", "\\\\]"], ["$$", "$$"]],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: "global"
+      }
+    };
+  </script>"""
+
+
+def render_mathjax_blocks(renderer: "Renderer", output_path: Path, options: BuildOptions) -> tuple[str, str]:
+    if options.mathjax_mode == "none":
+        return "", ""
+
+    config = render_mathjax_config()
+    if options.mathjax_mode == "cdn":
+        return config, '<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>'
+
+    mathjax_path = options.mathjax_path
+    resolved = mathjax_path if mathjax_path.is_absolute() else (ROOT / mathjax_path)
+    resolved = resolved.resolve()
+    if not resolved.exists():
+        renderer.add_message("warning", f"local MathJax file not found: {mathjax_path.as_posix()}")
+    src = html_relpath(resolved, output_path.parent)
+    return config, f'<script defer src="{html.escape(src)}"></script>'
+
+
+def render_asset_blocks(output_path: Path, options: BuildOptions) -> tuple[str, str]:
+    css = read_text(ROOT / "assets" / "kirei.css")
+    js = read_text(ROOT / "assets" / "kirei.js")
+    if options.assets_mode == "inline":
+        return f"<style>\n{css}\n  </style>", f"<script>\n{js}\n  </script>"
+
+    asset_dir = output_path.parent / "assets"
+    css_output = asset_dir / "kirei.css"
+    js_output = asset_dir / "kirei.js"
+    css_href = html_relpath(css_output, output_path.parent)
+    js_src = html_relpath(js_output, output_path.parent)
+    return (
+        f'<link rel="stylesheet" href="{html.escape(css_href)}">',
+        f'<script src="{html.escape(js_src)}"></script>',
+    )
+
+
+def copy_external_assets(output_path: Path) -> None:
+    asset_dir = output_path.parent / "assets"
+    asset_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ROOT / "assets" / "kirei.css", asset_dir / "kirei.css")
+    shutil.copyfile(ROOT / "assets" / "kirei.js", asset_dir / "kirei.js")
 
 
 class Renderer:
@@ -769,12 +842,12 @@ class Renderer:
 
 
 def build(input_path: Path, output_path: Path, options: BuildOptions | None = None) -> Renderer:
-    options = options or BuildOptions()
+    options = normalize_options(options or BuildOptions())
     renderer = Renderer(input_path, options)
     title, subtitle, toc, content = renderer.render_document(read_text(input_path))
     template = read_text(ROOT / "templates" / "book.html")
-    css = read_text(ROOT / "assets" / "kirei.css")
-    js = read_text(ROOT / "assets" / "kirei.js")
+    css_block, js_block = render_asset_blocks(output_path, options)
+    mathjax_config, mathjax_script = render_mathjax_blocks(renderer, output_path, options)
     generated_at = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
 
     html_output = (
@@ -782,12 +855,16 @@ def build(input_path: Path, output_path: Path, options: BuildOptions | None = No
         .replace("{{ subtitle }}", html.escape(subtitle))
         .replace("{{ toc }}", toc)
         .replace("{{ content }}", content)
-        .replace("{{ css }}", css)
-        .replace("{{ js }}", js)
+        .replace("{{ css_block }}", css_block)
+        .replace("{{ mathjax_config }}", mathjax_config)
+        .replace("{{ mathjax_script }}", mathjax_script)
+        .replace("{{ js_block }}", js_block)
         .replace("{{ generated_at }}", generated_at)
     )
 
     if not options.check and (not renderer.has_errors or options.allow_output_on_error):
+        if options.assets_mode == "external":
+            copy_external_assets(output_path)
         write_text(output_path, html_output)
 
     return renderer
@@ -837,6 +914,19 @@ def main() -> int:
     parser.add_argument("--allow-output-on-error", action="store_true", help="Write HTML even if errors are found")
     parser.add_argument("--quiet", action="store_true", help="Suppress warning details")
     parser.add_argument("--check", action="store_true", help="Check syntax without writing HTML")
+    parser.add_argument("--mathjax", choices=["cdn", "local", "none"], default="cdn", help="MathJax loading mode")
+    parser.add_argument(
+        "--mathjax-path",
+        type=Path,
+        default=Path("vendor/mathjax/tex-svg.js"),
+        help="Local MathJax path used with --mathjax local",
+    )
+    parser.add_argument("--assets", choices=["inline", "external"], default="inline", help="CSS/JS output mode")
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="Shortcut for --mathjax local --assets inline",
+    )
     args = parser.parse_args()
 
     options = BuildOptions(
@@ -844,6 +934,10 @@ def main() -> int:
         allow_output_on_error=args.allow_output_on_error,
         quiet=args.quiet,
         check=args.check,
+        mathjax_mode=args.mathjax,
+        mathjax_path=args.mathjax_path,
+        assets_mode=args.assets,
+        offline=args.offline,
     )
     renderer = build(args.input, args.output, options)
     print_report(renderer, quiet=args.quiet)

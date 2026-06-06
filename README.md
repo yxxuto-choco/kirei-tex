@@ -13,6 +13,77 @@ python src/build.py examples/sample.ktex dist/sample.html
 
 このMVPではCSSとJavaScriptをHTMLへインライン展開します。数式表示にはMathJax CDNを使うため、初回表示時はインターネット接続が必要です。
 
+### MathJax の読み込みモード
+
+通常は CDN モードで十分です。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --mathjax cdn
+```
+
+ネットワークなしで読む教材にしたい場合は local モードを使います。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample-local.html --mathjax local
+```
+
+local モードでは、デフォルトで `vendor/mathjax/tex-svg.js` を参照します。
+MathJax本体はこのリポジトリには同梱していないため、自分で配置してください。
+
+```text
+vendor/
+  mathjax/
+    tex-svg.js
+```
+
+別の場所に置く場合は `--mathjax-path` で指定できます。
+HTML内には、出力HTMLから見た相対パスで埋め込まれます。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample-local.html --mathjax local --mathjax-path vendor/mathjax/tex-svg.js
+```
+
+数式がない文書や、すでに数式変換済みのHTMLを扱う場合は MathJax を読み込まない `none` を使えます。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample-none.html --mathjax none
+```
+
+### Assets の出力モード
+
+デフォルトは `inline` です。
+CSSとKirei TeX用JavaScriptをHTMLに埋め込むため、HTMLファイル単体に近い形で扱えます。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --assets inline
+```
+
+`external` を使うと、`dist/assets/kirei.css` と `dist/assets/kirei.js` にコピーし、HTMLから相対パスで読み込みます。
+複数HTMLで同じCSS/JSを共有したい場合に向いています。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample-external.html --assets external
+```
+
+### オフライン向けビルド
+
+人に配る教材や、ネットがない場所で読む教材には `--offline` を使います。
+これは `--mathjax local --assets inline` と同じ扱いです。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample-offline.html --offline
+```
+
+ただし、完全オフラインで数式表示するには、事前に `vendor/mathjax/tex-svg.js` を配置する必要があります。
+現時点では MathJax 本体をHTMLへ完全インライン埋め込みする機能はありません。
+
+使い分けの目安:
+
+- 普段の確認: `--mathjax cdn --assets inline`
+- ネットなしで読む: `--offline`
+- 数式なし文書: `--mathjax none`
+- 複数HTMLを同じ見た目で配る: `--assets external`
+
 ### 構文チェック
 
 HTMLを出力せず、原稿の構文だけを確認できます。
@@ -214,8 +285,8 @@ python -m unittest discover tests
 
 ## 今後の拡張方針
 
-1. `.ktex` の構文エラー位置をわかりやすく表示する。
+1. より高度な構文診断・修復提案を追加する。
 2. `\kgap` を脚注風・余白注風・ポップアップ風から選べるようにする。
-3. MathJaxをローカル同梱できるビルドモードを追加する。
+3. MathJax本体の取得・配置を支援するセットアップコマンドを追加する。
 4. 段階ヒント機能を強化し、複数ヒントや表示順制御を扱えるようにする。
 5. 最終的にLaTeXパッケージ化し、PDF向け出力とHTML向け出力を同じ原稿から分岐できるようにする。

@@ -81,6 +81,71 @@ class BuildTests(unittest.TestCase):
             self.assertEqual(len(renderer.errors), 1)
             self.assertIn("duplicate label 'thm:a'", renderer.errors[0].message)
 
+    def test_default_build_includes_mathjax_cdn(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "sample.html"
+            renderer = build(ROOT / "examples" / "sample.ktex", output, BuildOptions())
+            html = output.read_text(encoding="utf-8")
+
+            self.assertFalse(renderer.errors)
+            self.assertIn("cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js", html)
+
+    def test_mathjax_none_omits_mathjax_script(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "sample-none.html"
+            renderer = build(
+                ROOT / "examples" / "sample.ktex",
+                output,
+                BuildOptions(mathjax_mode="none"),
+            )
+            html = output.read_text(encoding="utf-8")
+
+            self.assertFalse(renderer.errors)
+            self.assertNotIn("window.MathJax = {", html)
+            self.assertNotIn("tex-svg.js", html)
+
+    def test_mathjax_local_uses_local_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "sample-local.html"
+            renderer = build(
+                ROOT / "examples" / "sample.ktex",
+                output,
+                BuildOptions(mathjax_mode="local", mathjax_path=Path("vendor/mathjax/tex-svg.js")),
+            )
+            html = output.read_text(encoding="utf-8")
+
+            self.assertFalse(renderer.errors)
+            self.assertIn("vendor/mathjax/tex-svg.js", html)
+            self.assertIn("local MathJax file not found", renderer.warnings[0].message)
+
+    def test_offline_sets_local_mathjax_and_inline_assets(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "sample-offline.html"
+            renderer = build(ROOT / "examples" / "sample.ktex", output, BuildOptions(offline=True))
+            html = output.read_text(encoding="utf-8")
+
+            self.assertFalse(renderer.errors)
+            self.assertIn("vendor/mathjax/tex-svg.js", html)
+            self.assertIn("<style>", html)
+            self.assertIn("const ADVANCED_KEY", html)
+            self.assertFalse((Path(temp_dir) / "assets" / "kirei.css").exists())
+
+    def test_external_assets_are_copied(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "sample-external.html"
+            renderer = build(
+                ROOT / "examples" / "sample.ktex",
+                output,
+                BuildOptions(assets_mode="external"),
+            )
+            html = output.read_text(encoding="utf-8")
+
+            self.assertFalse(renderer.errors)
+            self.assertIn('href="assets/kirei.css"', html)
+            self.assertIn('src="assets/kirei.js"', html)
+            self.assertTrue((Path(temp_dir) / "assets" / "kirei.css").exists())
+            self.assertTrue((Path(temp_dir) / "assets" / "kirei.js").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
