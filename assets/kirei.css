@@ -1,0 +1,322 @@
+:root {
+  --paper: #fffdf8;
+  --ink: #211b16;
+  --muted: #6c6257;
+  --rule: #e7dccb;
+  --accent: #9b5b22;
+  --accent-soft: #f8ead8;
+  --theorem: #1f6f68;
+  --theorem-soft: #e9f5f2;
+  --note: #7a5c12;
+  --note-soft: #fbf3d8;
+  --example: #7b3f31;
+  --example-soft: #f8e8e3;
+  --advanced: #365f8d;
+  --advanced-soft: #e9f1fb;
+  --shadow: 0 18px 45px rgba(54, 42, 25, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    linear-gradient(90deg, rgba(155, 91, 34, 0.045) 1px, transparent 1px),
+    linear-gradient(180deg, #fffaf0 0%, var(--paper) 18rem, #fbf7ee 100%);
+  background-size: 28px 28px, auto;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif CJK JP", serif;
+  font-size: 18px;
+  line-height: 1.95;
+}
+
+.book-header,
+.book-page,
+.book-footer {
+  width: min(100% - 32px, 820px);
+  margin-inline: auto;
+}
+
+.book-header {
+  padding: 72px 0 28px;
+}
+
+.book-kicker {
+  color: var(--accent);
+  font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-feature-settings: "palt";
+  line-height: 1.35;
+}
+
+h1 {
+  margin: 0.25em 0 0.15em;
+  font-size: clamp(2.2rem, 7vw, 4.4rem);
+  letter-spacing: -0.04em;
+}
+
+.book-subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 3vw, 1.25rem);
+}
+
+.book-actions {
+  display: flex;
+  margin-top: 28px;
+}
+
+.advanced-toggle {
+  display: inline-flex;
+  gap: 0.65em;
+  align-items: center;
+  padding: 0.55em 0.9em;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.82);
+  box-shadow: 0 8px 22px rgba(54, 42, 25, 0.08);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", sans-serif;
+  font-size: 0.92rem;
+  user-select: none;
+}
+
+.advanced-toggle input {
+  accent-color: var(--advanced);
+}
+
+.book-page {
+  position: relative;
+  padding: clamp(28px, 6vw, 58px);
+  border: 1px solid var(--rule);
+  border-radius: 28px;
+  background: rgba(255, 253, 248, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.book-page::before {
+  position: absolute;
+  inset: 18px auto 18px 18px;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(var(--accent), transparent);
+  content: "";
+  opacity: 0.18;
+}
+
+h2 {
+  margin: 2.4em 0 0.8em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--rule);
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+}
+
+h2:first-child {
+  margin-top: 0;
+}
+
+h3 {
+  margin: 2em 0 0.65em;
+  font-size: 1.35rem;
+}
+
+p {
+  margin: 1em 0;
+}
+
+code {
+  padding: 0.1em 0.32em;
+  border-radius: 0.35em;
+  background: #f1eadf;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.9em;
+}
+
+.math-display {
+  overflow-x: auto;
+  margin: 1.25em 0;
+  padding: 0.45em 0;
+}
+
+.kbox {
+  margin: 1.6em 0;
+  padding: 1.05em 1.15em 1.15em;
+  border: 1px solid var(--rule);
+  border-left: 6px solid var(--accent);
+  border-radius: 18px;
+  background: #fffaf1;
+}
+
+.kbox-label {
+  margin-bottom: 0.3em;
+  font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.kbox-body > :first-child,
+.kfold-body > :first-child,
+.kadvanced-body > :first-child {
+  margin-top: 0;
+}
+
+.kbox-body > :last-child,
+.kfold-body > :last-child,
+.kadvanced-body > :last-child {
+  margin-bottom: 0;
+}
+
+.kbox-theorem {
+  border-left-color: var(--theorem);
+  background: var(--theorem-soft);
+}
+
+.kbox-note {
+  border-left-color: var(--note);
+  background: var(--note-soft);
+}
+
+.kbox-example {
+  border-left-color: var(--example);
+  background: var(--example-soft);
+}
+
+.kfold {
+  margin: 1.4em 0;
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  background: #fffbf4;
+  overflow: hidden;
+}
+
+.kfold summary {
+  padding: 0.85em 1em;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", sans-serif;
+  font-weight: 800;
+}
+
+.kfold summary:hover {
+  background: var(--accent-soft);
+}
+
+.kfold-body {
+  padding: 0.2em 1.15em 1.15em;
+  border-top: 1px solid var(--rule);
+}
+
+.kgap {
+  position: relative;
+  display: inline-flex;
+  vertical-align: baseline;
+}
+
+.kgap-trigger {
+  display: inline-grid;
+  width: 1.45em;
+  height: 1.45em;
+  margin: 0 0.12em;
+  place-items: center;
+  border: 1px solid #c89554;
+  border-radius: 999px;
+  background: #fff6e8;
+  color: var(--accent);
+  cursor: pointer;
+  font: 700 0.75em/1 "Yu Gothic", "Hiragino Sans", sans-serif;
+}
+
+.kgap-trigger:hover,
+.kgap-trigger[aria-expanded="true"] {
+  background: var(--accent);
+  color: #fffaf1;
+}
+
+.kgap-popover {
+  position: absolute;
+  z-index: 5;
+  top: 1.9em;
+  left: 50%;
+  width: min(76vw, 360px);
+  padding: 0.75em 0.9em;
+  border: 1px solid #d6b17b;
+  border-radius: 14px;
+  background: #fffaf0;
+  box-shadow: 0 14px 34px rgba(54, 42, 25, 0.18);
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.75;
+  transform: translateX(-50%);
+}
+
+.kadvanced {
+  display: none;
+  margin: 2em 0;
+  padding: 1.1em 1.2em 1.2em;
+  border: 1px solid #bfd4ea;
+  border-radius: 22px;
+  background: var(--advanced-soft);
+}
+
+body.show-advanced .kadvanced {
+  display: block;
+}
+
+.kadvanced-ribbon {
+  display: inline-flex;
+  margin-bottom: 0.8em;
+  padding: 0.18em 0.75em;
+  border-radius: 999px;
+  background: var(--advanced);
+  color: white;
+  font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.book-footer {
+  padding: 20px 0 48px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 16px;
+    line-height: 1.88;
+  }
+
+  .book-header {
+    padding-top: 42px;
+  }
+
+  .book-page {
+    width: min(100% - 20px, 820px);
+    padding: 24px 20px;
+    border-radius: 20px;
+  }
+
+  .book-page::before {
+    display: none;
+  }
+
+  .kgap-popover {
+    position: fixed;
+    inset: auto 14px 20px;
+    width: auto;
+    transform: none;
+  }
+}
