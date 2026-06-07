@@ -2,7 +2,7 @@
   const ADVANCED_KEY = "kirei.showAdvanced";
   const THEME_KEY = "kirei.theme";
   const SCROLL_KEY = "kirei.scroll";
-  const THEMES = ["rich", "mono", "spread"];
+  const THEMES = ["rich", "mono"];
   const SCROLL_MODES = ["vertical", "horizontal"];
 
   const storage = {
@@ -33,16 +33,33 @@
     return found || "rich";
   };
 
+  const normalizeTheme = (theme) => {
+    if (theme === "spread") {
+      return "mono";
+    }
+    return THEMES.includes(theme) ? theme : "rich";
+  };
+
+  const releaseControlFocus = (input) => {
+    window.setTimeout(() => {
+      input?.blur?.();
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+    }, 0);
+  };
+
   const currentScrollFromBody = () => {
     const found = SCROLL_MODES.find((mode) => document.body.classList.contains(`scroll-${mode}`));
     return found || "vertical";
   };
 
   const setTheme = (theme, persist = true) => {
-    const nextTheme = THEMES.includes(theme) ? theme : "rich";
+    const nextTheme = normalizeTheme(theme);
     THEMES.forEach((name) => {
       document.body.classList.toggle(`theme-${name}`, name === nextTheme);
     });
+    document.body.classList.remove("theme-spread");
     document.querySelectorAll("input[name='kirei-theme']").forEach((input) => {
       input.checked = input.value === nextTheme;
     });
@@ -105,6 +122,7 @@
       input.addEventListener("change", () => {
         if (input.checked) {
           setTheme(input.value);
+          releaseControlFocus(input);
         }
       });
     });
@@ -112,6 +130,7 @@
       input.addEventListener("change", () => {
         if (input.checked) {
           setScrollMode(input.value);
+          releaseControlFocus(input);
         }
       });
     });

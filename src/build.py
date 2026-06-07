@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 KTEX_ENVS = "kfold|kbox|kadvanced|kproof|kexercise|khint|kanswer"
 SUPPORTED_ENVS = set(KTEX_ENVS.split("|"))
-THEME_MODES = {"rich", "mono", "spread"}
+THEME_MODES = {"rich", "mono"}
 BEGIN_RE = re.compile(rf"\\begin\{{({KTEX_ENVS})\}}(?:\[([^\]]*)\])?", re.DOTALL)
 ANY_BEGIN_RE = re.compile(r"\\begin\{([^}]+)\}")
 KREF_RE = re.compile(r"\\kref\{([^{}]+)\}")
@@ -1120,7 +1120,7 @@ def render_html_output(
     css_block, js_block = render_asset_blocks(output_path, options)
     mathjax_config, mathjax_script = render_mathjax_blocks(renderer, output_path, options)
     generated_at = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
-    scroll_class = "scroll-horizontal" if options.theme == "spread" else "scroll-vertical"
+    scroll_class = "scroll-vertical"
 
     return (
         template.replace("{{ title }}", html.escape(title))
@@ -1224,7 +1224,7 @@ def main() -> int:
         help="Local MathJax path used with --mathjax local",
     )
     parser.add_argument("--assets", choices=["inline", "external"], default="inline", help="CSS/JS output mode")
-    parser.add_argument("--theme", choices=["rich", "mono", "spread"], default="rich", help="Initial display theme")
+    parser.add_argument("--theme", choices=["rich", "mono"], default="rich", help="Initial display theme")
     parser.add_argument(
         "--offline",
         action="store_true",

@@ -108,14 +108,17 @@ class BuildTests(unittest.TestCase):
             self.assertFalse(renderer.errors)
             self.assertIn('<body class="theme-mono scroll-vertical">', html)
 
-    def test_spread_theme_adds_body_class(self) -> None:
+    def test_scroll_mode_controls_are_rendered(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            output = Path(temp_dir) / "sample-spread.html"
-            renderer = build(ROOT / "examples" / "sample.ktex", output, BuildOptions(theme="spread"))
+            output = Path(temp_dir) / "sample.html"
+            renderer = build(ROOT / "examples" / "sample.ktex", output, BuildOptions())
             html = output.read_text(encoding="utf-8")
 
             self.assertFalse(renderer.errors)
-            self.assertIn('<body class="theme-spread scroll-horizontal">', html)
+            self.assertIn('name="kirei-scroll"', html)
+            self.assertIn('value="vertical"', html)
+            self.assertIn('value="horizontal"', html)
+            self.assertNotIn('value="spread"', html)
 
     def test_mathjax_none_omits_mathjax_script(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -271,21 +274,11 @@ class BuildTests(unittest.TestCase):
             self.assertFalse(renderer.errors)
             self.assertIn('<body class="theme-mono scroll-vertical">', html)
 
-    def test_book_spread_theme_is_supported(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            output = Path(temp_dir) / "book-spread.html"
-            renderer = build_book(ROOT / "examples" / "book.kirei.yml", output, BuildOptions(theme="spread"))
-            html = output.read_text(encoding="utf-8")
-
-            self.assertFalse(renderer.errors)
-            self.assertIn('<body class="theme-spread scroll-horizontal">', html)
-
     def test_theme_css_and_js_are_present(self) -> None:
         css = (ROOT / "assets" / "kirei.css").read_text(encoding="utf-8")
         js = (ROOT / "assets" / "kirei.js").read_text(encoding="utf-8")
 
         self.assertIn("body.theme-mono", css)
-        self.assertIn("body.theme-spread", css)
         self.assertIn("column-width", css)
         self.assertNotIn("break-before: column", css)
         self.assertNotIn("overflow-y: hidden", css)
@@ -294,6 +287,7 @@ class BuildTests(unittest.TestCase):
         self.assertIn("body.scroll-horizontal", css)
         self.assertIn("kirei.theme", js)
         self.assertIn("kirei.scroll", js)
+        self.assertIn("releaseControlFocus", js)
 
     def test_invalid_manifest_is_error(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

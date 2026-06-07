@@ -126,6 +126,8 @@ h1 {
   color: var(--muted);
   font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", sans-serif;
   font-size: 0.86rem;
+  touch-action: manipulation;
+  user-select: none;
 }
 
 .theme-switcher legend,
@@ -138,6 +140,8 @@ h1 {
 .theme-switcher label,
 .scroll-switcher label {
   cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
 }
 
 .theme-switcher input,
