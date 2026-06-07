@@ -8,7 +8,7 @@
   {{ mathjax_config }}
   {{ mathjax_script }}
 </head>
-<body>
+<body class="{{ theme_class }}">
   <header class="book-header">
     <div class="book-kicker">Kirei TeX prototype</div>
     <h1>{{ title }}</h1>
@@ -18,6 +18,21 @@
         <input id="advanced-toggle" type="checkbox">
         <span id="advanced-toggle-label">発展を表示</span>
       </label>
+      <fieldset class="theme-switcher" aria-label="表示モード">
+        <legend>表示</legend>
+        <label>
+          <input type="radio" name="kirei-theme" value="rich">
+          <span>リッチ</span>
+        </label>
+        <label>
+          <input type="radio" name="kirei-theme" value="mono">
+          <span>白黒</span>
+        </label>
+        <label>
+          <input type="radio" name="kirei-theme" value="spread">
+          <span>見開き</span>
+        </label>
+      </fieldset>
     </div>
   </header>
 

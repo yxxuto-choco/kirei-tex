@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 KTEX_ENVS = "kfold|kbox|kadvanced|kproof|kexercise|khint|kanswer"
 SUPPORTED_ENVS = set(KTEX_ENVS.split("|"))
+THEME_MODES = {"rich", "mono", "spread"}
 BEGIN_RE = re.compile(rf"\\begin\{{({KTEX_ENVS})\}}(?:\[([^\]]*)\])?", re.DOTALL)
 ANY_BEGIN_RE = re.compile(r"\\begin\{([^}]+)\}")
 KREF_RE = re.compile(r"\\kref\{([^{}]+)\}")
@@ -65,6 +66,7 @@ class BuildOptions:
     mathjax_path: Path = Path("vendor/mathjax/tex-svg.js")
     assets_mode: str = "inline"
     offline: bool = False
+    theme: str = "rich"
 
 
 @dataclass
@@ -206,6 +208,8 @@ def normalize_options(options: BuildOptions) -> BuildOptions:
     if options.offline:
         options.mathjax_mode = "local"
         options.assets_mode = "inline"
+    if options.theme not in THEME_MODES:
+        options.theme = "rich"
     return options
 
 
@@ -1127,6 +1131,7 @@ def render_html_output(
         .replace("{{ mathjax_script }}", mathjax_script)
         .replace("{{ js_block }}", js_block)
         .replace("{{ generated_at }}", generated_at)
+        .replace("{{ theme_class }}", f"theme-{html.escape(options.theme)}")
     )
 
 
@@ -1217,6 +1222,7 @@ def main() -> int:
         help="Local MathJax path used with --mathjax local",
     )
     parser.add_argument("--assets", choices=["inline", "external"], default="inline", help="CSS/JS output mode")
+    parser.add_argument("--theme", choices=["rich", "mono", "spread"], default="rich", help="Initial display theme")
     parser.add_argument(
         "--offline",
         action="store_true",
@@ -1233,6 +1239,7 @@ def main() -> int:
         mathjax_path=args.mathjax_path,
         assets_mode=args.assets,
         offline=args.offline,
+        theme=args.theme,
     )
     renderer = build_book(args.input, args.output, options) if args.book else build(args.input, args.output, options)
     print_report(renderer, quiet=args.quiet)

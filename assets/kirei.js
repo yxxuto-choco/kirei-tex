@@ -1,5 +1,7 @@
 (() => {
   const ADVANCED_KEY = "kirei.showAdvanced";
+  const THEME_KEY = "kirei.theme";
+  const THEMES = ["rich", "mono", "spread"];
 
   const storage = {
     get(key) {
@@ -13,15 +15,34 @@
       try {
         window.localStorage?.setItem(key, value);
       } catch {
-        // Local file previews may block storage; the toggle should still work.
+        // Local file previews may block storage; the controls should still work.
       }
     },
   };
 
   const typeset = (node) => {
     if (window.MathJax?.typesetPromise) {
-      window.MathJax.typesetPromise([node]).catch(() => {});
+      window.MathJax.typesetPromise(node ? [node] : undefined).catch(() => {});
     }
+  };
+
+  const currentThemeFromBody = () => {
+    const found = THEMES.find((theme) => document.body.classList.contains(`theme-${theme}`));
+    return found || "rich";
+  };
+
+  const setTheme = (theme, persist = true) => {
+    const nextTheme = THEMES.includes(theme) ? theme : "rich";
+    THEMES.forEach((name) => {
+      document.body.classList.toggle(`theme-${name}`, name === nextTheme);
+    });
+    document.querySelectorAll("input[name='kirei-theme']").forEach((input) => {
+      input.checked = input.value === nextTheme;
+    });
+    if (persist) {
+      storage.set(THEME_KEY, nextTheme);
+    }
+    typeset(document.body);
   };
 
   const setAdvancedVisible = (visible) => {
@@ -54,6 +75,16 @@
     const advancedToggle = document.getElementById("advanced-toggle");
     const advancedCount = document.querySelectorAll("[data-advanced]").length;
     const shouldShowAdvanced = storage.get(ADVANCED_KEY) === "1";
+    const savedTheme = storage.get(THEME_KEY);
+
+    setTheme(savedTheme || currentThemeFromBody(), Boolean(savedTheme));
+    document.querySelectorAll("input[name='kirei-theme']").forEach((input) => {
+      input.addEventListener("change", () => {
+        if (input.checked) {
+          setTheme(input.value);
+        }
+      });
+    });
 
     updateAdvancedLabel(advancedCount);
 

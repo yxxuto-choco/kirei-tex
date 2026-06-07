@@ -93,6 +93,9 @@ h1 {
 
 .book-actions {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.75em;
+  align-items: center;
   margin-top: 28px;
 }
 
@@ -114,6 +117,57 @@ h1 {
 
 .advanced-toggle input {
   accent-color: var(--advanced);
+}
+
+.theme-switcher {
+  display: inline-flex;
+  gap: 0.25em;
+  align-items: center;
+  margin: 0;
+  padding: 0.35em;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.82);
+  box-shadow: 0 8px 22px rgba(54, 42, 25, 0.08);
+  color: var(--muted);
+  font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", sans-serif;
+  font-size: 0.86rem;
+}
+
+.theme-switcher legend {
+  padding: 0 0.45em;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.theme-switcher label {
+  cursor: pointer;
+}
+
+.theme-switcher input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.theme-switcher span {
+  display: inline-flex;
+  padding: 0.25em 0.72em;
+  border-radius: 999px;
+}
+
+.theme-switcher input:checked + span {
+  background: var(--accent);
+  color: #fffaf1;
+}
+
+.theme-switcher input:focus-visible + span {
+  outline: 2px solid var(--advanced);
+  outline-offset: 2px;
 }
 
 .book-page {
@@ -618,6 +672,336 @@ body.show-advanced .kadvanced-notice {
   font-size: 0.85rem;
 }
 
+body.theme-mono,
+body.theme-spread {
+  --paper: #fff;
+  --ink: #111;
+  --muted: #555;
+  --rule: #bbb;
+  --accent: #111;
+  --accent-soft: #f4f4f4;
+  --theorem: #111;
+  --theorem-soft: #fff;
+  --note: #111;
+  --note-soft: #fff;
+  --example: #111;
+  --example-soft: #fff;
+  --advanced: #111;
+  --advanced-soft: #fff;
+  --proof: #111;
+  --proof-soft: #fff;
+  --exercise: #111;
+  --exercise-soft: #fff;
+  --hint: #111;
+  --hint-soft: #fff;
+  --answer: #111;
+  --answer-soft: #fff;
+  --shadow: none;
+  color: #111;
+  background: #fff;
+}
+
+body.theme-mono .book-header,
+body.theme-mono .book-page,
+body.theme-mono .book-footer,
+body.theme-spread .book-header,
+body.theme-spread .book-page,
+body.theme-spread .book-footer {
+  width: min(100% - 36px, 820px);
+}
+
+body.theme-mono .book-header,
+body.theme-spread .book-header {
+  padding-top: 54px;
+}
+
+body.theme-mono .book-kicker,
+body.theme-spread .book-kicker {
+  color: #444;
+  letter-spacing: 0.08em;
+}
+
+body.theme-mono .book-header h1,
+body.theme-spread .book-header h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: -0.025em;
+}
+
+body.theme-mono .book-page,
+body.theme-spread .book-page {
+  padding: clamp(34px, 6vw, 70px);
+  border: 1px solid #aaa;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+}
+
+body.theme-mono .book-page::before,
+body.theme-spread .book-page::before {
+  display: none;
+}
+
+body.theme-mono h1,
+body.theme-mono h2,
+body.theme-mono h3,
+body.theme-mono h4,
+body.theme-spread h1,
+body.theme-spread h2,
+body.theme-spread h3,
+body.theme-spread h4 {
+  letter-spacing: 0;
+}
+
+body.theme-mono h2,
+body.theme-spread h2 {
+  margin-top: 2.25em;
+  border-bottom: 1px solid #333;
+  font-size: clamp(1.35rem, 3vw, 1.7rem);
+}
+
+body.theme-mono h3,
+body.theme-spread h3 {
+  font-size: 1.18rem;
+}
+
+body.theme-mono h4,
+body.theme-spread h4 {
+  font-size: 1.03rem;
+}
+
+body.theme-mono .advanced-toggle,
+body.theme-mono .theme-switcher,
+body.theme-spread .advanced-toggle,
+body.theme-spread .theme-switcher {
+  border-color: #999;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+  color: #111;
+}
+
+body.theme-mono .theme-switcher span,
+body.theme-spread .theme-switcher span {
+  border-radius: 0;
+}
+
+body.theme-mono .theme-switcher input:checked + span,
+body.theme-spread .theme-switcher input:checked + span {
+  background: #111;
+  color: #fff;
+}
+
+body.theme-mono .kchapter,
+body.theme-spread .kchapter {
+  padding: 0 0 1.4em;
+  border: 0;
+  border-bottom: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+}
+
+body.theme-mono .kchapter-kicker,
+body.theme-spread .kchapter-kicker {
+  color: #333;
+}
+
+body.theme-mono .kchapter h1,
+body.theme-spread .kchapter h1 {
+  font-size: clamp(1.7rem, 4vw, 2.45rem);
+}
+
+body.theme-mono .ktoc,
+body.theme-spread .ktoc {
+  border: 1px solid #999;
+  border-radius: 0;
+  background: #fff;
+}
+
+body.theme-mono .ktoc summary,
+body.theme-spread .ktoc summary {
+  color: #111;
+}
+
+body.theme-mono .ktoc ol,
+body.theme-spread .ktoc ol {
+  border-top: 1px solid #aaa;
+}
+
+body.theme-mono .ktoc-chapter,
+body.theme-spread .ktoc-chapter {
+  border-top-color: #ccc;
+}
+
+body.theme-mono .ktoc a,
+body.theme-spread .ktoc a,
+body.theme-mono .kref,
+body.theme-spread .kref {
+  color: #111;
+  text-decoration-color: #555;
+}
+
+body.theme-mono .kref-missing,
+body.theme-spread .kref-missing {
+  color: #111;
+  font-weight: 800;
+}
+
+body.theme-mono .kbox,
+body.theme-mono .kexercise,
+body.theme-spread .kbox,
+body.theme-spread .kexercise {
+  padding: 1em 1.05em;
+  border: 1px solid #222;
+  border-left: 1px solid #222;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+}
+
+body.theme-mono .kbox-label,
+body.theme-mono .kexercise-label,
+body.theme-spread .kbox-label,
+body.theme-spread .kexercise-label {
+  letter-spacing: 0;
+}
+
+body.theme-mono .kexercise-level,
+body.theme-spread .kexercise-level {
+  border: 1px solid #777;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+}
+
+body.theme-mono .kfold,
+body.theme-mono .kproof,
+body.theme-mono .khint,
+body.theme-mono .kanswer,
+body.theme-spread .kfold,
+body.theme-spread .kproof,
+body.theme-spread .khint,
+body.theme-spread .kanswer {
+  border: 1px solid #999;
+  border-radius: 0;
+  background: #fff;
+}
+
+body.theme-mono .kproof,
+body.theme-spread .kproof {
+  border-left: 3px solid #111;
+}
+
+body.theme-mono .kfold summary,
+body.theme-mono .kproof summary,
+body.theme-mono .khint summary,
+body.theme-mono .kanswer summary,
+body.theme-spread .kfold summary,
+body.theme-spread .kproof summary,
+body.theme-spread .khint summary,
+body.theme-spread .kanswer summary {
+  color: #111;
+}
+
+body.theme-mono .kfold summary:hover,
+body.theme-mono .kproof summary:hover,
+body.theme-mono .khint summary:hover,
+body.theme-mono .kanswer summary:hover,
+body.theme-spread .kfold summary:hover,
+body.theme-spread .kproof summary:hover,
+body.theme-spread .khint summary:hover,
+body.theme-spread .kanswer summary:hover {
+  background: #f2f2f2;
+}
+
+body.theme-mono .kgap-trigger,
+body.theme-spread .kgap-trigger {
+  border-color: #111;
+  background: #fff;
+  color: #111;
+}
+
+body.theme-mono .kgap-trigger:hover,
+body.theme-mono .kgap-trigger[aria-expanded="true"],
+body.theme-spread .kgap-trigger:hover,
+body.theme-spread .kgap-trigger[aria-expanded="true"] {
+  background: #111;
+  color: #fff;
+}
+
+body.theme-mono .kgap-popover,
+body.theme-spread .kgap-popover {
+  border-color: #777;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+}
+
+body.theme-mono .kadvanced,
+body.theme-mono .kadvanced-notice,
+body.theme-spread .kadvanced,
+body.theme-spread .kadvanced-notice {
+  border: 1px dashed #777;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+}
+
+body.theme-mono .kadvanced-ribbon,
+body.theme-spread .kadvanced-ribbon {
+  border-radius: 0;
+  background: #111;
+}
+
+body.theme-spread {
+  background: #ececec;
+}
+
+body.theme-spread .book-header,
+body.theme-spread .book-footer {
+  width: min(100% - 36px, 1180px);
+}
+
+body.theme-spread .book-page {
+  width: min(100% - 36px, 1180px);
+  border-color: #d0d0d0;
+  background:
+    linear-gradient(90deg, #fff 0, #fff calc(50% - 36px), #f3f3f3 calc(50% - 36px), #f3f3f3 calc(50% + 36px), #fff calc(50% + 36px), #fff 100%);
+}
+
+@media (min-width: 1100px) {
+  body.theme-spread .book-page {
+    column-count: 2;
+    column-gap: 72px;
+    column-rule: 1px solid #ddd;
+  }
+
+  body.theme-spread .ktoc,
+  body.theme-spread .kchapter {
+    break-after: avoid;
+  }
+
+  body.theme-spread .kchapter {
+    break-before: column;
+  }
+
+  body.theme-spread .kchapter:first-of-type {
+    break-before: auto;
+  }
+}
+
+body.theme-spread .kbox,
+body.theme-spread .kexercise,
+body.theme-spread .kproof,
+body.theme-spread .khint,
+body.theme-spread .kanswer,
+body.theme-spread .kfold,
+body.theme-spread .math-display,
+body.theme-spread .kchapter,
+body.theme-spread h2,
+body.theme-spread h3 {
+  break-inside: avoid;
+}
+
 @media (max-width: 640px) {
   body {
     font-size: 16px;
@@ -681,6 +1065,144 @@ body.show-advanced .kadvanced-notice {
   }
 }
 
+@media print {
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body,
+  body.theme-rich,
+  body.theme-mono,
+  body.theme-spread {
+    color: #000 !important;
+    background: #fff !important;
+    font-size: 11pt;
+    line-height: 1.65;
+  }
+
+  .book-header,
+  .book-page,
+  .book-footer {
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  .book-header {
+    padding: 0 0 1.2em !important;
+  }
+
+  .book-page {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    column-count: auto !important;
+  }
+
+  .book-page::before,
+  .book-actions,
+  .advanced-toggle,
+  .theme-switcher,
+  .kgap-trigger,
+  .kadvanced-notice {
+    display: none !important;
+  }
+
+  .book-header h1 {
+    font-size: 22pt !important;
+  }
+
+  .book-subtitle,
+  .book-kicker {
+    color: #333 !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: #000 !important;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  h2 {
+    border-bottom: 1px solid #000 !important;
+  }
+
+  a,
+  .kref {
+    color: #000 !important;
+    text-decoration-color: #000 !important;
+  }
+
+  .ktoc,
+  .kchapter,
+  .kbox,
+  .kexercise,
+  .kfold,
+  .kproof,
+  .khint,
+  .kanswer,
+  .kadvanced {
+    border-color: #000 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .kchapter {
+    border-width: 0 0 2px !important;
+  }
+
+  .kbox,
+  .kexercise,
+  .kproof,
+  .khint,
+  .kanswer,
+  .kfold,
+  .math-display,
+  .kchapter {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .kfold-body,
+  .kproof-body,
+  .khint-body,
+  .kanswer-body,
+  details:not([open]) > :not(summary) {
+    display: block !important;
+  }
+
+  .kgap-popover {
+    position: static !important;
+    display: inline !important;
+    border: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    font-size: inherit !important;
+  }
+
+  .kgap-popover::before {
+    content: "（注: ";
+  }
+
+  .kgap-popover::after {
+    content: "）";
+  }
+
+  body.show-advanced .kadvanced,
+  .kadvanced {
+    display: block !important;
+  }
+
+  .book-footer {
+    display: none !important;
+  }
+}
+
   </style>
   <script>
     window.MathJax = {
@@ -696,7 +1218,7 @@ body.show-advanced .kadvanced-notice {
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
-<body>
+<body class="theme-rich">
   <header class="book-header">
     <div class="book-kicker">Kirei TeX prototype</div>
     <h1>二次形式とヘッセ行列</h1>
@@ -706,6 +1228,21 @@ body.show-advanced .kadvanced-notice {
         <input id="advanced-toggle" type="checkbox">
         <span id="advanced-toggle-label">発展を表示</span>
       </label>
+      <fieldset class="theme-switcher" aria-label="表示モード">
+        <legend>表示</legend>
+        <label>
+          <input type="radio" name="kirei-theme" value="rich">
+          <span>リッチ</span>
+        </label>
+        <label>
+          <input type="radio" name="kirei-theme" value="mono">
+          <span>白黒</span>
+        </label>
+        <label>
+          <input type="radio" name="kirei-theme" value="spread">
+          <span>見開き</span>
+        </label>
+      </fieldset>
     </div>
   </header>
 
@@ -894,12 +1431,14 @@ $a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生
   </main>
 
   <footer class="book-footer">
-    <p>Generated by <code>src/build.py</code> at 2026-06-07 02:14.</p>
+    <p>Generated by <code>src/build.py</code> at 2026-06-07 11:34.</p>
   </footer>
 
   <script>
 (() => {
   const ADVANCED_KEY = "kirei.showAdvanced";
+  const THEME_KEY = "kirei.theme";
+  const THEMES = ["rich", "mono", "spread"];
 
   const storage = {
     get(key) {
@@ -913,15 +1452,34 @@ $a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生
       try {
         window.localStorage?.setItem(key, value);
       } catch {
-        // Local file previews may block storage; the toggle should still work.
+        // Local file previews may block storage; the controls should still work.
       }
     },
   };
 
   const typeset = (node) => {
     if (window.MathJax?.typesetPromise) {
-      window.MathJax.typesetPromise([node]).catch(() => {});
+      window.MathJax.typesetPromise(node ? [node] : undefined).catch(() => {});
     }
+  };
+
+  const currentThemeFromBody = () => {
+    const found = THEMES.find((theme) => document.body.classList.contains(`theme-${theme}`));
+    return found || "rich";
+  };
+
+  const setTheme = (theme, persist = true) => {
+    const nextTheme = THEMES.includes(theme) ? theme : "rich";
+    THEMES.forEach((name) => {
+      document.body.classList.toggle(`theme-${name}`, name === nextTheme);
+    });
+    document.querySelectorAll("input[name='kirei-theme']").forEach((input) => {
+      input.checked = input.value === nextTheme;
+    });
+    if (persist) {
+      storage.set(THEME_KEY, nextTheme);
+    }
+    typeset(document.body);
   };
 
   const setAdvancedVisible = (visible) => {
@@ -954,6 +1512,16 @@ $a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生
     const advancedToggle = document.getElementById("advanced-toggle");
     const advancedCount = document.querySelectorAll("[data-advanced]").length;
     const shouldShowAdvanced = storage.get(ADVANCED_KEY) === "1";
+    const savedTheme = storage.get(THEME_KEY);
+
+    setTheme(savedTheme || currentThemeFromBody(), Boolean(savedTheme));
+    document.querySelectorAll("input[name='kirei-theme']").forEach((input) => {
+      input.addEventListener("change", () => {
+        if (input.checked) {
+          setTheme(input.value);
+        }
+      });
+    });
 
     updateAdvancedLabel(advancedCount);
 

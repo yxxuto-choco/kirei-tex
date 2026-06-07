@@ -18,6 +18,28 @@ python src/build.py --book examples/book.kirei.yml dist/book.html
 
 生成されたHTMLはブラウザで直接開けます。Webサーバーは不要です。
 
+## 表示テーマ
+
+`--theme` で初期表示テーマを選べます。デフォルトは `rich` です。
+
+```powershell
+python src/build.py examples/sample.ktex dist/sample.html --theme rich
+python src/build.py examples/sample.ktex dist/sample-mono.html --theme mono
+python src/build.py examples/sample.ktex dist/sample-spread.html --theme spread
+python src/build.py --book examples/book.kirei.yml dist/book-mono.html --theme mono
+python src/build.py --book examples/book.kirei.yml dist/book-spread.html --theme spread
+```
+
+- `rich`: 既存のWeb教材風表示です。背景、色、カード、影を使った読みやすいインタラクティブ教材向けの見た目です。
+- `mono`: 白黒数学書・論文風表示です。白背景、黒文字、細い罫線、広めの余白で、PDFや講義ノートに近い読み心地を目指します。
+- `spread`: 見開き読書風表示です。広い画面では本文を見開きの紙面に近い雰囲気で表示し、狭い画面では1ページ表示に戻ります。
+
+生成HTMLの画面上部にも表示モード切替があります。閲覧中に `リッチ`、`白黒`、`見開き` を切り替えられ、選択は `localStorage` の `kirei.theme` に保存されます。次回同じHTMLを開いたときは、保存された表示モードが復元されます。
+
+印刷やPDF保存には `mono` または `spread` が向いています。ブラウザの印刷機能からPDF化できます。印刷時は背景、影、表示切替UIを消し、白黒の紙面に近いCSSへ寄せています。`kadvanced` は印刷時には内容が見えるように扱われます。
+
+`spread` はCSSによる簡易的な見開き表示です。厳密なページ番号、禁則処理、ページ割り、見開き単位の完全な組版は行いません。本格的なPDF組版は今後の課題です。
+
 ## Book Mode
 
 `--book` を付けると、入力ファイルを `.kirei.yml` manifest として読みます。
@@ -276,6 +298,8 @@ python -m unittest discover tests
 - `label` 参照に対応しているのは、現在 `kbox` と `kexercise` です。
 - manifest パーサーは簡易YAML風で、複雑なYAML構文には対応していません。
 - MathJax本体は `vendor/mathjax/tex-svg.js` として配置できますが、HTMLへの完全インライン埋め込みは未対応です。
+- `spread` はCSSによる簡易見開き表示であり、厳密なページ組版ではありません。
+- 本格的なPDF組版、ページ番号、柱、禁則処理は今後の課題です。
 
 ## 今後の拡張方針
 
