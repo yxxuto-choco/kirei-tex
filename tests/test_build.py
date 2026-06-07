@@ -288,6 +288,8 @@ class BuildTests(unittest.TestCase):
         self.assertIn("body.theme-spread", css)
         self.assertIn("column-width", css)
         self.assertNotIn("break-before: column", css)
+        self.assertNotIn("overflow-y: hidden", css)
+        self.assertNotIn("linear-gradient(90deg, transparent", css)
         self.assertIn("kirei.theme", js)
 
     def test_invalid_manifest_is_error(self) -> None:

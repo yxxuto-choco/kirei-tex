@@ -963,39 +963,85 @@ body.theme-spread .book-page {
 
 @media (min-width: 1100px) {
   body.theme-spread {
-    overflow-y: hidden;
+    overflow-y: auto;
   }
 
   body.theme-spread .book-header {
-    padding-top: 24px;
-    padding-bottom: 14px;
+    position: sticky;
+    z-index: 10;
+    top: 0;
+    display: flex;
+    width: calc(100vw - 48px);
+    max-width: none;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 24px;
+    padding: 8px 0 7px;
+    background: #e9e9e9;
+  }
+
+  body.theme-spread .book-kicker {
+    display: none;
   }
 
   body.theme-spread .book-header h1 {
-    margin-top: 0.1em;
-    font-size: clamp(1.55rem, 3vw, 2.25rem);
+    flex: 1 1 auto;
+    margin: 0;
+    overflow: hidden;
+    font-size: clamp(0.95rem, 1.4vw, 1.25rem);
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   body.theme-spread .book-subtitle {
     display: none;
   }
 
+  body.theme-spread .book-actions {
+    flex: 0 0 auto;
+    gap: 0.45rem;
+    margin: 0;
+  }
+
+  body.theme-spread .advanced-toggle {
+    padding: 0.28em 0.55em;
+    font-size: 0.76rem;
+  }
+
+  body.theme-spread .theme-switcher {
+    padding: 0.16em;
+    font-size: 0.72rem;
+  }
+
+  body.theme-spread .theme-switcher legend {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  body.theme-spread .theme-switcher span {
+    padding: 0.18em 0.5em;
+  }
+
   body.theme-spread .book-page {
     width: calc(100vw - 48px);
     max-width: none;
-    height: calc(100vh - 176px);
+    height: calc(100vh - 76px);
     min-height: 620px;
     margin: 0 24px;
     padding: 42px 48px;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto;
     column-width: min(46vw, 520px);
     column-gap: 82px;
     column-fill: auto;
-    column-rule: 1px solid #d8d8d8;
-    background:
-      linear-gradient(90deg, transparent calc(50% - 42px), #d8d8d8 calc(50% - 42px), #d8d8d8 calc(50% - 41px), transparent calc(50% - 41px), transparent calc(50% + 41px), #d8d8d8 calc(50% + 41px), #d8d8d8 calc(50% + 42px), transparent calc(50% + 42px)),
-      #fff;
+    column-rule: 0;
+    background: #fff;
     outline: 1px solid #cfcfcf;
     box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
   }
