@@ -1120,6 +1120,7 @@ def render_html_output(
     css_block, js_block = render_asset_blocks(output_path, options)
     mathjax_config, mathjax_script = render_mathjax_blocks(renderer, output_path, options)
     generated_at = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
+    scroll_class = "scroll-horizontal" if options.theme == "spread" else "scroll-vertical"
 
     return (
         template.replace("{{ title }}", html.escape(title))
@@ -1132,6 +1133,7 @@ def render_html_output(
         .replace("{{ js_block }}", js_block)
         .replace("{{ generated_at }}", generated_at)
         .replace("{{ theme_class }}", f"theme-{html.escape(options.theme)}")
+        .replace("{{ scroll_class }}", scroll_class)
     )
 
 

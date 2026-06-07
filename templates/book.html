@@ -8,7 +8,7 @@
   {{ mathjax_config }}
   {{ mathjax_script }}
 </head>
-<body class="{{ theme_class }}">
+<body class="{{ theme_class }} {{ scroll_class }}">
   <header class="book-header">
     <div class="book-kicker">Kirei TeX prototype</div>
     <h1>{{ title }}</h1>
@@ -31,6 +31,17 @@
         <label>
           <input type="radio" name="kirei-theme" value="spread">
           <span>見開き</span>
+        </label>
+      </fieldset>
+      <fieldset class="scroll-switcher" aria-label="スクロールモード">
+        <legend>読方向</legend>
+        <label>
+          <input type="radio" name="kirei-scroll" value="vertical">
+          <span>縦</span>
+        </label>
+        <label>
+          <input type="radio" name="kirei-scroll" value="horizontal">
+          <span>横</span>
         </label>
       </fieldset>
     </div>

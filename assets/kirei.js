@@ -1,7 +1,9 @@
 (() => {
   const ADVANCED_KEY = "kirei.showAdvanced";
   const THEME_KEY = "kirei.theme";
+  const SCROLL_KEY = "kirei.scroll";
   const THEMES = ["rich", "mono", "spread"];
+  const SCROLL_MODES = ["vertical", "horizontal"];
 
   const storage = {
     get(key) {
@@ -31,6 +33,11 @@
     return found || "rich";
   };
 
+  const currentScrollFromBody = () => {
+    const found = SCROLL_MODES.find((mode) => document.body.classList.contains(`scroll-${mode}`));
+    return found || "vertical";
+  };
+
   const setTheme = (theme, persist = true) => {
     const nextTheme = THEMES.includes(theme) ? theme : "rich";
     THEMES.forEach((name) => {
@@ -41,6 +48,20 @@
     });
     if (persist) {
       storage.set(THEME_KEY, nextTheme);
+    }
+    typeset(document.body);
+  };
+
+  const setScrollMode = (mode, persist = true) => {
+    const nextMode = SCROLL_MODES.includes(mode) ? mode : "vertical";
+    SCROLL_MODES.forEach((name) => {
+      document.body.classList.toggle(`scroll-${name}`, name === nextMode);
+    });
+    document.querySelectorAll("input[name='kirei-scroll']").forEach((input) => {
+      input.checked = input.value === nextMode;
+    });
+    if (persist) {
+      storage.set(SCROLL_KEY, nextMode);
     }
     typeset(document.body);
   };
@@ -76,12 +97,21 @@
     const advancedCount = document.querySelectorAll("[data-advanced]").length;
     const shouldShowAdvanced = storage.get(ADVANCED_KEY) === "1";
     const savedTheme = storage.get(THEME_KEY);
+    const savedScrollMode = storage.get(SCROLL_KEY);
 
     setTheme(savedTheme || currentThemeFromBody(), Boolean(savedTheme));
+    setScrollMode(savedScrollMode || currentScrollFromBody(), Boolean(savedScrollMode));
     document.querySelectorAll("input[name='kirei-theme']").forEach((input) => {
       input.addEventListener("change", () => {
         if (input.checked) {
           setTheme(input.value);
+        }
+      });
+    });
+    document.querySelectorAll("input[name='kirei-scroll']").forEach((input) => {
+      input.addEventListener("change", () => {
+        if (input.checked) {
+          setScrollMode(input.value);
         }
       });
     });
