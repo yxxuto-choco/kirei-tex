@@ -946,7 +946,8 @@ body.theme-spread .kadvanced-ribbon {
 }
 
 body.theme-spread {
-  background: #ececec;
+  overflow-x: auto;
+  background: #e9e9e9;
 }
 
 body.theme-spread .book-header,
@@ -956,29 +957,64 @@ body.theme-spread .book-footer {
 
 body.theme-spread .book-page {
   width: min(100% - 36px, 1180px);
-  border-color: #d0d0d0;
-  background:
-    linear-gradient(90deg, #fff 0, #fff calc(50% - 36px), #f3f3f3 calc(50% - 36px), #f3f3f3 calc(50% + 36px), #fff calc(50% + 36px), #fff 100%);
+  border: 0;
+  background: transparent;
 }
 
 @media (min-width: 1100px) {
+  body.theme-spread {
+    overflow-y: hidden;
+  }
+
+  body.theme-spread .book-header {
+    padding-top: 24px;
+    padding-bottom: 14px;
+  }
+
+  body.theme-spread .book-header h1 {
+    margin-top: 0.1em;
+    font-size: clamp(1.55rem, 3vw, 2.25rem);
+  }
+
+  body.theme-spread .book-subtitle {
+    display: none;
+  }
+
   body.theme-spread .book-page {
-    column-count: 2;
-    column-gap: 72px;
-    column-rule: 1px solid #ddd;
+    width: calc(100vw - 48px);
+    max-width: none;
+    height: calc(100vh - 176px);
+    min-height: 620px;
+    margin: 0 24px;
+    padding: 42px 48px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    column-width: min(46vw, 520px);
+    column-gap: 82px;
+    column-fill: auto;
+    column-rule: 1px solid #d8d8d8;
+    background:
+      linear-gradient(90deg, transparent calc(50% - 42px), #d8d8d8 calc(50% - 42px), #d8d8d8 calc(50% - 41px), transparent calc(50% - 41px), transparent calc(50% + 41px), #d8d8d8 calc(50% + 41px), #d8d8d8 calc(50% + 42px), transparent calc(50% + 42px)),
+      #fff;
+    outline: 1px solid #cfcfcf;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
   }
 
-  body.theme-spread .ktoc,
-  body.theme-spread .kchapter {
-    break-after: avoid;
+  body.theme-spread .book-page::after {
+    position: fixed;
+    right: 36px;
+    bottom: 18px;
+    padding: 0.2em 0.55em;
+    border: 1px solid #c8c8c8;
+    background: rgba(255, 255, 255, 0.85);
+    color: #555;
+    content: "横にスクロールしてページを読む";
+    font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", sans-serif;
+    font-size: 0.78rem;
   }
 
-  body.theme-spread .kchapter {
-    break-before: column;
-  }
-
-  body.theme-spread .kchapter:first-of-type {
-    break-before: auto;
+  body.theme-spread .book-footer {
+    display: none;
   }
 }
 
@@ -993,6 +1029,12 @@ body.theme-spread .kchapter,
 body.theme-spread h2,
 body.theme-spread h3 {
   break-inside: avoid;
+}
+
+body.theme-spread .ktoc,
+body.theme-spread .kchapter {
+  break-before: auto;
+  break-after: auto;
 }
 
 @media (max-width: 640px) {
@@ -1094,6 +1136,7 @@ body.theme-spread h3 {
   }
 
   .book-page::before,
+  .book-page::after,
   .book-actions,
   .advanced-toggle,
   .theme-switcher,
