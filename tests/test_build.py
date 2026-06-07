@@ -115,10 +115,11 @@ class BuildTests(unittest.TestCase):
             html = output.read_text(encoding="utf-8")
 
             self.assertFalse(renderer.errors)
-            self.assertIn('name="kirei-scroll"', html)
-            self.assertIn('value="vertical"', html)
-            self.assertIn('value="horizontal"', html)
-            self.assertNotIn('value="spread"', html)
+            self.assertIn('data-scroll-choice="vertical"', html)
+            self.assertIn('data-scroll-choice="horizontal"', html)
+            self.assertIn('data-theme-choice="rich"', html)
+            self.assertIn('data-theme-choice="mono"', html)
+            self.assertNotIn('data-theme-choice="spread"', html)
 
     def test_mathjax_none_omits_mathjax_script(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -160,14 +161,28 @@ class BuildTests(unittest.TestCase):
             self.assertFalse(renderer.errors)
             self.assertIn("local MathJax file not found", renderer.warnings[0].message)
 
-    def test_offline_sets_local_mathjax_and_inline_assets(self) -> None:
+    def test_mathjax_embed_inlines_mathjax_script(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "sample-embed.html"
+            renderer = build(
+                ROOT / "examples" / "sample.ktex",
+                output,
+                BuildOptions(mathjax_mode="embed", mathjax_path=Path("vendor/mathjax/tex-svg.js")),
+            )
+            html = output.read_text(encoding="utf-8")
+
+            self.assertFalse(renderer.errors)
+            self.assertIn("MathJax.loader", html)
+            self.assertNotIn('src="vendor/mathjax/tex-svg.js"', html)
+
+    def test_offline_embeds_mathjax_and_inline_assets(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             output = Path(temp_dir) / "sample-offline.html"
             renderer = build(ROOT / "examples" / "sample.ktex", output, BuildOptions(offline=True))
             html = output.read_text(encoding="utf-8")
 
             self.assertFalse(renderer.errors)
-            self.assertIn("vendor/mathjax/tex-svg.js", html)
+            self.assertIn("MathJax.loader", html)
             self.assertIn("<style>", html)
             self.assertIn("const ADVANCED_KEY", html)
             self.assertFalse((Path(temp_dir) / "assets" / "kirei.css").exists())
@@ -255,14 +270,14 @@ class BuildTests(unittest.TestCase):
             self.assertTrue(renderer.errors)
             self.assertIn("duplicate label 'dup:label'", renderer.errors[0].message)
 
-    def test_book_offline_uses_local_mathjax(self) -> None:
+    def test_book_offline_embeds_mathjax(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             output = Path(temp_dir) / "book-offline.html"
             renderer = build_book(ROOT / "examples" / "book.kirei.yml", output, BuildOptions(offline=True))
             html = output.read_text(encoding="utf-8")
 
             self.assertFalse(renderer.errors)
-            self.assertIn("vendor/mathjax/tex-svg.js", html)
+            self.assertIn("MathJax.loader", html)
             self.assertIn("<style>", html)
 
     def test_book_mono_theme_is_supported(self) -> None:

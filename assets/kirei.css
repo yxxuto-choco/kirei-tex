@@ -137,39 +137,32 @@ h1 {
   font-weight: 800;
 }
 
-.theme-switcher label,
-.scroll-switcher label {
+.theme-switcher button,
+.scroll-switcher button {
   cursor: pointer;
   touch-action: manipulation;
   user-select: none;
 }
 
-.theme-switcher input,
-.scroll-switcher input {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.theme-switcher span,
-.scroll-switcher span {
+.theme-switcher button,
+.scroll-switcher button {
   display: inline-flex;
   padding: 0.25em 0.72em;
+  border: 0;
   border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
 }
 
-.theme-switcher input:checked + span,
-.scroll-switcher input:checked + span {
+.theme-switcher button.is-active,
+.scroll-switcher button.is-active {
   background: var(--accent);
   color: #fffaf1;
 }
 
-.theme-switcher input:focus-visible + span,
-.scroll-switcher input:focus-visible + span {
+.theme-switcher button:focus-visible,
+.scroll-switcher button:focus-visible {
   outline: 2px solid var(--advanced);
   outline-offset: 2px;
 }
@@ -786,17 +779,17 @@ body.theme-spread .scroll-switcher {
   color: #111;
 }
 
-body.theme-mono .theme-switcher span,
-body.theme-mono .scroll-switcher span,
-body.theme-spread .theme-switcher span,
-body.theme-spread .scroll-switcher span {
+body.theme-mono .theme-switcher button,
+body.theme-mono .scroll-switcher button,
+body.theme-spread .theme-switcher button,
+body.theme-spread .scroll-switcher button {
   border-radius: 0;
 }
 
-body.theme-mono .theme-switcher input:checked + span,
-body.theme-mono .scroll-switcher input:checked + span,
-body.theme-spread .theme-switcher input:checked + span,
-body.theme-spread .scroll-switcher input:checked + span {
+body.theme-mono .theme-switcher button.is-active,
+body.theme-mono .scroll-switcher button.is-active,
+body.theme-spread .theme-switcher button.is-active,
+body.theme-spread .scroll-switcher button.is-active {
   background: #111;
   color: #fff;
 }
@@ -1041,7 +1034,7 @@ body.theme-spread .book-page {
     white-space: nowrap;
   }
 
-  body.theme-spread .theme-switcher span {
+  body.theme-spread .theme-switcher button {
     padding: 0.18em 0.5em;
   }
 
@@ -1185,8 +1178,8 @@ body.scroll-vertical .book-page {
     white-space: nowrap;
   }
 
-  body.scroll-horizontal .theme-switcher span,
-  body.scroll-horizontal .scroll-switcher span {
+  body.scroll-horizontal .theme-switcher button,
+  body.scroll-horizontal .scroll-switcher button {
     padding: 0.18em 0.5em;
   }
 
@@ -1388,6 +1381,7 @@ body.scroll-vertical .book-page {
   .book-actions,
   .advanced-toggle,
   .theme-switcher,
+  .scroll-switcher,
   .kgap-trigger,
   .kadvanced-notice {
     display: none !important;

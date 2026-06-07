@@ -206,7 +206,7 @@ def write_text(path: Path, content: str) -> None:
 
 def normalize_options(options: BuildOptions) -> BuildOptions:
     if options.offline:
-        options.mathjax_mode = "local"
+        options.mathjax_mode = "embed"
         options.assets_mode = "inline"
     if options.theme not in THEME_MODES:
         options.theme = "rich"
@@ -245,6 +245,10 @@ def render_mathjax_blocks(renderer: "Renderer", output_path: Path, options: Buil
     resolved = resolved.resolve()
     if not resolved.exists():
         renderer.add_message("warning", f"local MathJax file not found: {mathjax_path.as_posix()}")
+        return config, ""
+    if options.mathjax_mode == "embed":
+        script = read_text(resolved).replace("</script", "<\\/script")
+        return config, f"<script>\n{script}\n</script>"
     src = html_relpath(resolved, output_path.parent)
     return config, f'<script defer src="{html.escape(src)}"></script>'
 
@@ -1216,7 +1220,12 @@ def main() -> int:
     parser.add_argument("--allow-output-on-error", action="store_true", help="Write HTML even if errors are found")
     parser.add_argument("--quiet", action="store_true", help="Suppress warning details")
     parser.add_argument("--check", action="store_true", help="Check syntax without writing HTML")
-    parser.add_argument("--mathjax", choices=["cdn", "local", "none"], default="cdn", help="MathJax loading mode")
+    parser.add_argument(
+        "--mathjax",
+        choices=["cdn", "local", "embed", "none"],
+        default="cdn",
+        help="MathJax loading mode",
+    )
     parser.add_argument(
         "--mathjax-path",
         type=Path,

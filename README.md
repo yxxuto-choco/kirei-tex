@@ -202,6 +202,12 @@ vendor/
 python src/build.py examples/sample.ktex dist/sample-local.html --mathjax local --mathjax-path vendor/mathjax/tex-svg.js
 ```
 
+スマホへHTML単体で渡す場合や、ファイルアプリ経由で開く場合は、MathJaxをHTML内に埋め込む `embed` が安全です。
+
+```powershell
+python src/build.py --book examples/book.kirei.yml dist/book-mobile.html --mathjax embed
+```
+
 MathJaxを読み込まない場合:
 
 ```powershell
@@ -238,10 +244,16 @@ python src/build.py --book examples/book.kirei.yml dist/book-offline.html --offl
 `--offline` は次と同じ扱いです。
 
 ```text
---mathjax local --assets inline
+--mathjax embed --assets inline
 ```
 
-注意: 現時点ではMathJax本体をHTMLへ完全インライン埋め込みしていません。完全オフラインで数式を表示するには、`vendor/mathjax/tex-svg.js` を事前に配置してください。
+`--offline` では CSS/JS と MathJax をHTML内へ埋め込みます。スマホで `book.html` を1ファイルとして開く場合は、次のように作ったHTMLを使うのがおすすめです。
+
+```powershell
+python src/build.py --book examples/book.kirei.yml dist/book-mobile.html --offline
+```
+
+注意: スマホの「ファイルプレビュー」アプリによっては、HTML内のJavaScript自体を実行しないことがあります。その場合はSafariやChromeなどのブラウザで開いてください。
 
 ## 構文チェックと診断
 
@@ -301,7 +313,7 @@ python -m unittest discover tests
 - 対応しているのは、Kirei TeX 独自マクロと簡易的な見出しです。
 - `label` 参照に対応しているのは、現在 `kbox` と `kexercise` です。
 - manifest パーサーは簡易YAML風で、複雑なYAML構文には対応していません。
-- MathJax本体は `vendor/mathjax/tex-svg.js` として配置できますが、HTMLへの完全インライン埋め込みは未対応です。
+- MathJax本体は `vendor/mathjax/tex-svg.js` から参照またはHTMLへ埋め込めます。ただし、埋め込みHTMLはファイルサイズが大きくなります。
 - `横` 読方向はCSSによる簡易ページ表示であり、厳密なページ組版ではありません。
 - 本格的なPDF組版、ページ番号、柱、禁則処理は今後の課題です。
 

@@ -40,9 +40,9 @@
     return THEMES.includes(theme) ? theme : "rich";
   };
 
-  const releaseControlFocus = (input) => {
+  const releaseControlFocus = (control) => {
     window.setTimeout(() => {
-      input?.blur?.();
+      control?.blur?.();
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
@@ -60,8 +60,10 @@
       document.body.classList.toggle(`theme-${name}`, name === nextTheme);
     });
     document.body.classList.remove("theme-spread");
-    document.querySelectorAll("input[name='kirei-theme']").forEach((input) => {
-      input.checked = input.value === nextTheme;
+    document.querySelectorAll("[data-theme-choice]").forEach((button) => {
+      const active = button.dataset.themeChoice === nextTheme;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
     });
     if (persist) {
       storage.set(THEME_KEY, nextTheme);
@@ -74,8 +76,10 @@
     SCROLL_MODES.forEach((name) => {
       document.body.classList.toggle(`scroll-${name}`, name === nextMode);
     });
-    document.querySelectorAll("input[name='kirei-scroll']").forEach((input) => {
-      input.checked = input.value === nextMode;
+    document.querySelectorAll("[data-scroll-choice]").forEach((button) => {
+      const active = button.dataset.scrollChoice === nextMode;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
     });
     if (persist) {
       storage.set(SCROLL_KEY, nextMode);
@@ -118,20 +122,16 @@
 
     setTheme(savedTheme || currentThemeFromBody(), Boolean(savedTheme));
     setScrollMode(savedScrollMode || currentScrollFromBody(), Boolean(savedScrollMode));
-    document.querySelectorAll("input[name='kirei-theme']").forEach((input) => {
-      input.addEventListener("change", () => {
-        if (input.checked) {
-          setTheme(input.value);
-          releaseControlFocus(input);
-        }
+    document.querySelectorAll("[data-theme-choice]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setTheme(button.dataset.themeChoice);
+        releaseControlFocus(button);
       });
     });
-    document.querySelectorAll("input[name='kirei-scroll']").forEach((input) => {
-      input.addEventListener("change", () => {
-        if (input.checked) {
-          setScrollMode(input.value);
-          releaseControlFocus(input);
-        }
+    document.querySelectorAll("[data-scroll-choice]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setScrollMode(button.dataset.scrollChoice);
+        releaseControlFocus(button);
       });
     });
 
