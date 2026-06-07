@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>二次形式とヘッセ行列</title>
+  <title>Kirei TeX 数学ノート</title>
   <style>
 :root {
   --paper: #fffdf8;
@@ -1506,8 +1506,8 @@ body.scroll-vertical .book-page {
 <body class="theme-rich scroll-vertical">
   <header class="book-header">
     <div class="book-kicker">Kirei TeX prototype</div>
-    <h1>二次形式とヘッセ行列</h1>
-    <p class="book-subtitle">混合項が凸性を壊す例</p>
+    <h1>Kirei TeX 数学ノート</h1>
+    <p class="book-subtitle">折りたたみと注釈で読む日本語数学教材</p>
     <div class="book-actions" aria-label="表示設定">
       <label class="advanced-toggle">
         <input id="advanced-toggle" type="checkbox">
@@ -1530,34 +1530,49 @@ body.scroll-vertical .book-page {
 <details class="ktoc" open>
   <summary>目次</summary>
   <ol>
-    <li class="ktoc-level-1"><a href="#section-1">1 二次形式を眺める</a></li>
-    <li class="ktoc-level-1"><a href="#section-2">2 ヘッセ行列で確認する</a></li>
-    <li class="ktoc-level-2"><a href="#section-2-1">2.1 二階微分による凸性判定</a></li>
-    <li class="ktoc-level-1"><a href="#section-3">3 混合項の見方</a></li>
-    <li class="ktoc-level-1"><a href="#section-4">4 発展: 判別式で一瞬で見る</a></li>
-    <li class="ktoc-level-1"><a href="#section-5">5 まとめ</a></li>
+    <li class="ktoc-chapter"><a href="#chapter-1">Chapter 1: 二次形式とヘッセ行列</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-1-1">1.1 二次形式を眺める</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-1-2">1.2 ヘッセ行列で確認する</a></li>
+    <li class="ktoc-level-2 ktoc-in-chapter"><a href="#section-1-2-1">1.2.1 二階偏微分による凸性判定</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-1-3">1.3 混合項の見方</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-1-4">1.4 判別式で一般に見る</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-1-5">1.5 まとめ</a></li>
+    <li class="ktoc-chapter"><a href="#chapter-2">Chapter 2: 固有値分解・特異値分解と情報量（自由度）</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-2-1">2.1 対称行列の固有値分解</a></li>
+    <li class="ktoc-level-2 ktoc-in-chapter"><a href="#section-2-1-1">2.1.1 なぜ固有ベクトルは直交するのか</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-2-2">2.2 固有値分解による低ランク近似</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-2-3">2.3 一般行列では特異値分解を用いる</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-2-4">2.4 SVDで特異ベクトルが直交する理由</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-2-5">2.5 情報量（自由度）の観点</a></li>
+    <li class="ktoc-level-2 ktoc-in-chapter"><a href="#section-2-5-1">2.5.1 一般の \(n\times n\) 行列</a></li>
+    <li class="ktoc-level-2 ktoc-in-chapter"><a href="#section-2-5-2">2.5.2 対称行列</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-2-6">2.6 SVDと固有値分解の自由度の差</a></li>
+    <li class="ktoc-level-1 ktoc-in-chapter"><a href="#section-2-7">2.7 演習</a></li>
   </ol>
 </details>
-<h2 id="section-1">1. 二次形式を眺める</h2>
+<section class="kchapter" id="chapter-1">
+  <div class="kchapter-kicker">Chapter 1</div>
+  <h1>二次形式とヘッセ行列</h1>
+</section>
+
+<h2 id="section-1-1">1.1 二次形式を眺める</h2>
 <p>二変数関数<br>
 \[
   f(x,y)=x^2+y^2+3xy
 \]<br>
-を考える。$x^2$ と $y^2$ の係数はどちらも正である。<br>
-しかし、このことだけでは $f$ が凸であるとは限らない。<span class="kgap" data-kgap><button class="kgap-trigger" type="button" aria-expanded="false" aria-controls="kgap-1" data-kgap-target="kgap-1">?</button><span id="kgap-1" class="kgap-popover" role="note" hidden>「平方の係数が正なら上に開いている」という一変数の直感を、そのまま二変数へ持ち込むと危ない。二変数では $xy$ のような混合項が曲がり方を変える。</span></span></p>
+を考える。$x^2$ と $y^2$ の係数はどちらも正である。しかし、このことだけでは $f$ が凸であるとは限らない。<span class="kgap" data-kgap><button class="kgap-trigger" type="button" aria-expanded="false" aria-controls="kgap-1" data-kgap-target="kgap-1">?</button><span id="kgap-1" class="kgap-popover" role="note" hidden>一変数の感覚では「二乗の係数が正なら上に開く」と考えたくなる。二変数では $xy$ のような混合項が、曲がり方を大きく変える。</span></span></p>
 <aside class="kbox kbox-example" id="ex-not-convex">
-  <div class="kbox-label">例 1.1（正の係数だけでは足りない）</div>
+  <div class="kbox-label">例 1.1（正の二乗係数だけでは凸性は分からない）</div>
   <div class="kbox-body">
 <p>$y=-x$ とおくと<br>
 \[
   f(x,-x)=x^2+x^2-3x^2=-x^2
 \]<br>
-となる。原点を通る直線 $y=-x$ に沿って見ると、グラフは上に開くどころか下に開いている。<br>
-したがって $f$ は凸ではない。</p>
+となる。原点を通る直線 $y=-x$ に沿って見ると、グラフは上に開くのではなく下に開いている。したがって $f$ は凸ではない。</p>
   </div>
 </aside>
-<h2 id="section-2">2. ヘッセ行列で確認する</h2>
-<p>二階微分をまとめた行列をヘッセ行列という。この関数では<br>
+<h2 id="section-1-2">1.2 ヘッセ行列で確認する</h2>
+<p>二階偏微分をまとめた行列をヘッセ行列という。この関数では<br>
 \[
   H_f=
   \begin{pmatrix}
@@ -1565,26 +1580,23 @@ body.scroll-vertical .book-page {
     3 & 2
   \end{pmatrix}
 \]<br>
-である。<br>
-<a class="kref" href="#ex-not-convex">例 1.1</a> の現象は、ヘッセ行列の固有値を見るとすぐに説明できる。</p>
-<h3 id="section-2-1">2.1 二階微分による凸性判定</h3>
+である。<a class="kref" href="#ex-not-convex">例 1.1</a> の現象は、ヘッセ行列の固有値を見るとすぐに説明できる。</p>
+<h3 id="section-1-2-1">1.2.1 二階偏微分による凸性判定</h3>
 <aside class="kbox kbox-theorem" id="thm-hessian">
-  <div class="kbox-label">定理 2.1（ヘッセ行列による凸性判定）</div>
+  <div class="kbox-label">定理 1.1（ヘッセ行列による凸性判定）</div>
   <div class="kbox-body">
-<p>領域上で二階微分可能な関数 $f$ が凸であるためには、各点のヘッセ行列 $H_f$ が半正定値であることが必要である。<br>
-さらに領域が凸で、すべての点で $H_f$ が半正定値なら、$f$ は凸である。<span class="kgap" data-kgap><button class="kgap-trigger" type="button" aria-expanded="false" aria-controls="kgap-2" data-kgap-target="kgap-2">?</button><span id="kgap-2" class="kgap-popover" role="note" hidden>ここでは厳密な証明よりも、ヘッセ行列が「全方向の二階微分」をまとめている、という直感を大切にする。</span></span></p>
+<p>領域上で二階偏微分可能な関数 $f$ が凸であるためには、各点のヘッセ行列 $H_f$ が半正定値であることが必要である。さらに領域が凸で、すべての点で $H_f$ が半正定値なら、$f$ は凸である。<br>
+<span class="kgap" data-kgap><button class="kgap-trigger" type="button" aria-expanded="false" aria-controls="kgap-2" data-kgap-target="kgap-2">?</button><span id="kgap-2" class="kgap-popover" role="note" hidden>ここでは厳密な証明よりも、ヘッセ行列が「各方向の二階微分」をまとめている、という直感を大切にする。</span></span></p>
   </div>
 </aside>
 <details class="kproof">
   <summary>証明</summary>
   <div class="kproof-body">
-<p>方向ベクトル $v$ に沿って $g(t)=f(p+tv)$ とおく。<br>
-一変数関数 $g$ の二階微分は<br>
+<p>方向ベクトル $v$ に沿って $g(t)=f(p+tv)$ とおく。一変数関数 $g$ の二階微分は<br>
 \[
   g''(0)=v^\mathsf{T}H_f(p)v
 \]<br>
-である。$f$ が凸なら、任意の直線上で見た $g$ も凸であるため $g''(0)\ge 0$ となる。<br>
-したがって任意の $v$ について $v^\mathsf{T}H_f(p)v\ge 0$ であり、$H_f(p)$ は半正定値である。</p>
+である。$f$ が凸なら、任意の直線上で見た $g$ も凸であるため $g''(0)\ge 0$ となる。したがって任意の $v$ について $v^\mathsf{T}H_f(p)v\ge 0$ であり、$H_f(p)$ は半正定値である。</p>
     <div class="qed" aria-label="証明終わり">□</div>
   </div>
 </details>
@@ -1598,17 +1610,16 @@ body.scroll-vertical .book-page {
     3 & 2
   \end{pmatrix}
 \]<br>
-の固有値は $5$ と $-1$ である。<br>
-負の固有値があるので、このヘッセ行列は半正定値ではない。</p>
-<p>実際、方向ベクトル $v=(1,-1)$ に対して<br>
+の固有値は $5$ と $-1$ である。負の固有値があるので、このヘッセ行列は半正定値ではない。</p>
+<p>実際、方向ベクトル $v=(1,-1)^\mathsf{T}$ に対して<br>
 \[
   v^\mathsf{T}H_fv=-2<0
 \]<br>
 となり、その方向には下向きに曲がっている。</p>
   </div>
 </details>
-<p><a class="kref" href="#thm-hessian">定理 2.1</a> を使えば、二次関数の凸性は係数の見た目ではなく行列の半正定値性として調べられる。</p>
-<h2 id="section-3">3. 混合項の見方</h2>
+<p><a class="kref" href="#thm-hessian">定理 1.1</a> を使えば、二次関数の凸性は係数の見た目ではなく、対応する対称行列の半正定値性として調べられる。</p>
+<h2 id="section-1-3">1.3 混合項の見方</h2>
 <p>一般の二次形式<br>
 \[
   q(x,y)=ax^2+2bxy+cy^2
@@ -1625,13 +1636,12 @@ body.scroll-vertical .book-page {
 <aside class="kbox kbox-note">
   <div class="kbox-label">係数を見る場所</div>
   <div class="kbox-body">
-<p>$x^2$ と $y^2$ の係数 $a,c$ だけでなく、混合項の係数 $2b$ も行列の非対角成分として効いてくる。<br>
-$a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生まれる。</p>
+<p>$x^2$ と $y^2$ の係数 $a,c$ だけでなく、混合項の係数 $2b$ も行列の非対角成分として効いてくる。$a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生まれる。</p>
   </div>
 </aside>
 <aside class="kexercise kexercise-standard" data-level="standard" id="ex-mixed-term">
   <div class="kexercise-header">
-    <div class="kexercise-label">演習 3.1（混合項の強さ）</div>
+    <div class="kexercise-label">演習 1.1（混合項が強い二次関数の凸性判定）</div>
     <div class="kexercise-level">standard</div>
   </div>
   <div class="kexercise-body">
@@ -1650,23 +1660,26 @@ $a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生
     t/2 & 1
   \end{pmatrix}
 \]<br>
-である。$2\times2$ の正定値・半正定値条件を使う。</p>
+である。$2\times2$ の半正定値条件を使う。</p>
   </div>
 </details>
 <details class="kanswer">
-  <summary>解答例</summary>
+  <summary>解答</summary>
   <div class="kanswer-body">
-<p>半正定値であればよいので、主対角成分が非負で、行列式が非負であればよい。<br>
-ここでは主対角成分はどちらも $1$ であり、<br>
+<p>半正定値であればよいので、主対角成分が非負で、行列式が非負であればよい。ここでは主対角成分はどちらも $1$ であり、<br>
 \[
   1-\left(\frac{t}{2}\right)^2\ge 0
 \]<br>
-が必要十分である。したがって $-2\le t\le 2$ である。</p>
+が必要十分である。したがって<br>
+\[
+  -2\le t\le 2
+\]<br>
+である。</p>
   </div>
 </details>
   </div>
 </aside>
-<p><a class="kref" href="#ex-mixed-term">演習 3.1</a> は、混合項がどの程度まで許されるかを自分の手で確かめるための練習である。</p>
+<p><a class="kref" href="#ex-mixed-term">演習 1.1</a> は、混合項がどの程度まで許されるかを自分の手で確かめるための練習である。</p>
 <div class="kadvanced-notice" data-advanced-notice>
   <span class="kadvanced-notice-label">発展内容があります</span>
   <span class="kadvanced-notice-text">上の「発展を表示」をオンにすると読めます。</span>
@@ -1674,7 +1687,7 @@ $a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生
 <section class="kadvanced" data-advanced>
   <div class="kadvanced-ribbon">発展</div>
   <div class="kadvanced-body">
-<h2 id="section-4">4. 発展: 判別式で一瞬で見る</h2>
+<h2 id="section-1-4">1.4 判別式で一般に見る</h2>
 <p>$2\times2$ の対称行列<br>
 \[
   A=
@@ -1684,8 +1697,7 @@ $a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生
   \end{pmatrix}
 \]<br>
 が正定値であるためには、$a>0$ かつ $ac-b^2>0$ が必要十分である。</p>
-<p>今回の例では $f(x,y)=x^2+y^2+3xy$ なので、$a=1,c=1,2b=3$、つまり $b=3/2$ である。<br>
-したがって<br>
+<p>今回の例では $f(x,y)=x^2+y^2+3xy$ なので、$a=1,c=1,2b=3$、つまり $b=3/2$ である。したがって<br>
 \[
   ac-b^2=1-\left(\frac{3}{2}\right)^2=-\frac{5}{4}<0
 \]<br>
@@ -1693,21 +1705,333 @@ $a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生
 <details class="kfold">
   <summary>なぜ $2bxy$ と書くのか</summary>
   <div class="kfold-body">
-<p>行列表示では<br>
+<p>行列表記では<br>
 \[
   \begin{pmatrix}x&y\end{pmatrix}
   \begin{pmatrix}a&b\\b&c\end{pmatrix}
   \begin{pmatrix}x\\y\end{pmatrix}
-  =ax^2+2bxy+cy^2
+  =
+  ax^2+2bxy+cy^2
 \]<br>
 となる。対称行列の上下の非対角成分が、どちらも $xy$ に寄与するためである。</p>
   </div>
 </details>
   </div>
 </section>
-<h2 id="section-5">5. まとめ</h2>
-<p>$x^2,y^2$ の係数が正でも、混合項が強いと凸性は失われる。<br>
-多変数の二次関数では、係数をばらばらに見るのではなく、ヘッセ行列や対応する対称行列の半正定値性を見るのが自然である。</p>
+<h2 id="section-1-5">1.5 まとめ</h2>
+<p>$x^2,y^2$ の係数が正でも、混合項が強いと凸性は失われる。多変数の二次関数では、係数をばらばらに見るのではなく、ヘッセ行列や対応する対称行列の半正定値性を見るのが自然である。</p>
+
+<section class="kchapter" id="chapter-2">
+  <div class="kchapter-kicker">Chapter 2</div>
+  <h1>固有値分解・特異値分解と情報量（自由度）</h1>
+</section>
+
+<h2 id="section-2-1">2.1 対称行列の固有値分解</h2>
+<p>この章では、対称行列の固有値分解と、一般行列の特異値分解（SVD）の関係を説明する。</p>
+<p>第1章の <a class="kref" href="#thm-hessian">定理 1.1</a> では、対称行列であるヘッセ行列の正定値性によって凸性を判定した。本章では、同じく対称行列の構造が重要になる固有値分解から出発する。</p>
+<p>実対称行列<br>
+\[
+  A=A^\top\in\mathbb{R}^{n\times n}
+\]<br>
+は、<br>
+\[
+  A=P\Lambda P^\top
+\]<br>
+と分解できる。ここで、$P=(p_1,\ldots,p_n)$ は互いに直交する単位固有ベクトルを並べた直交行列、$\Lambda=\mathrm{diag}(\lambda_1,\ldots,\lambda_n)$ は固有値を並べた対角行列である。</p>
+<aside class="kbox kbox-theorem" id="thm-spectral-decomposition">
+  <div class="kbox-label">定理 2.1（実対称行列の固有値分解）</div>
+  <div class="kbox-body">
+<p>実対称行列 \(A=A^\top\in\mathbb{R}^{n\times n}\) は、ある直交行列 \(P\) と実対角行列 \(\Lambda\) によって<br>
+\[
+  A=P\Lambda P^\top
+\]<br>
+と表される。</p>
+  </div>
+</aside>
+<h3 id="section-2-1-1">2.1.1 なぜ固有ベクトルは直交するのか</h3>
+<p>異なる固有値に対応する固有ベクトル $p_i,p_j$ に対し、<br>
+\[
+  Ap_i=\lambda_i p_i,\qquad
+  Ap_j=\lambda_j p_j
+\]<br>
+とする。対称性は、内積の中で行列を左右に移しても同じ情報を保つ、という形で現れる。</p>
+<details class="kproof">
+  <summary>異なる固有値に対応する固有ベクトルの直交性</summary>
+  <div class="kproof-body">
+<p>対称行列では \(A^\top=A\) なので、<br>
+\[
+  \langle Ap_i,p_j\rangle
+  =
+  \langle p_i,A^\top p_j\rangle
+  =
+  \langle p_i,Ap_j\rangle
+\]<br>
+である。</p>
+<p>一方で、<br>
+\[
+  \langle Ap_i,p_j\rangle
+  =
+  \lambda_i\langle p_i,p_j\rangle
+\]<br>
+かつ<br>
+\[
+  \langle p_i,Ap_j\rangle
+  =
+  \lambda_j\langle p_i,p_j\rangle
+\]<br>
+であるから、<br>
+\[
+  \lambda_i\langle p_i,p_j\rangle
+  =
+  \lambda_j\langle p_i,p_j\rangle
+\]<br>
+を得る。したがって、<br>
+\[
+  (\lambda_i-\lambda_j)\langle p_i,p_j\rangle=0
+\]<br>
+であり、\(\lambda_i\ne\lambda_j\) なら<br>
+\[
+  \langle p_i,p_j\rangle=0
+\]<br>
+となる。</p>
+    <div class="qed" aria-label="証明終わり">□</div>
+  </div>
+</details>
+<p>この直交性は、対称行列が「内積と相性のよい変換」であることを反映している。一般の行列では、固有ベクトルがこのように綺麗に直交するとは限らない。そのため、一般行列に対しては後で見る特異値分解が重要になる。</p>
+<h2 id="section-2-2">2.2 固有値分解による低ランク近似</h2>
+<p><a class="kref" href="#thm-spectral-decomposition">定理 2.1</a> により、対称行列は<br>
+\[
+  A
+  =
+  \sum_{i=1}^{n}
+  \lambda_i p_i p_i^\top
+\]<br>
+と書ける。固有値を大きい順に並べたとき、上位 $k$ 項のみを残して、<br>
+\[
+  A
+  \approx
+  \sum_{i=1}^{k}
+  \lambda_i p_i p_i^\top
+\]<br>
+と近似することができる。</p>
+<p>これは、対称行列に対する代表的な次元圧縮法である。大きな固有値に対応する方向ほど、その行列が空間を強く伸ばしたり縮めたりする方向を表している。小さな固有値に対応する方向は、行列の作用としては影響が弱いので、近似では省いても全体像が大きく崩れにくい。</p>
+<h2 id="section-2-3">2.3 一般行列では特異値分解を用いる</h2>
+<p>画像データや表データを行列として見ると、多くの場合<br>
+\[
+  A\in\mathbb{R}^{m\times n}
+\]<br>
+であり、正方行列であるとは限らない。正方行列であっても、一般には<br>
+\[
+  A\neq A^\top
+\]<br>
+である。</p>
+<p>したがって、一般の行列では固有値分解ではなく、<br>
+\[
+  A=U\Sigma V^\top
+\]<br>
+という特異値分解、Singular Value Decomposition, SVD を用いる。ここで、$U=(u_1,\ldots,u_r)$ は左特異ベクトル、$V=(v_1,\ldots,v_r)$ は右特異ベクトル、$\Sigma=\mathrm{diag}(\sigma_1,\ldots,\sigma_r)$ は特異値を並べた対角型行列である。</p>
+<p>また、<br>
+\[
+  A
+  =
+  \sum_{i=1}^{r}
+  \sigma_i u_i v_i^\top
+\]<br>
+と書くことができる。</p>
+<aside class="kbox kbox-definition" id="def-svd">
+  <div class="kbox-label">定義 2.1（特異値分解）</div>
+  <div class="kbox-body">
+<p>任意の行列 \(A\in\mathbb{R}^{m\times n}\) は、適切な直交行列 \(U,V\) と、非負の特異値を並べた対角型行列 \(\Sigma\) により<br>
+\[
+  A=U\Sigma V^\top
+\]<br>
+と分解できる。</p>
+  </div>
+</aside>
+<p>SVDでは、入力側の方向を表す $v_i$ と、出力側の方向を表す $u_i$ が別々に現れる。これは、一般の行列が「同じ空間の中での対称な変換」とは限らず、入力方向と出力方向を分けて考える必要があるためである。</p>
+<h2 id="section-2-4">2.4 SVDで特異ベクトルが直交する理由</h2>
+<p>一般の行列 $A$ に対して、<br>
+\[
+  A^\top A
+\]<br>
+は必ず対称行列になる。したがって、<br>
+\[
+  A^\top A v_i
+  =
+  \sigma_i^2 v_i
+\]<br>
+と固有値分解でき、右特異ベクトル $v_i$ は互いに直交する。さらに、<br>
+\[
+  u_i
+  =
+  \frac{Av_i}{\sigma_i}
+\]<br>
+と定義すると、左特異ベクトル $u_i$ も互いに直交する。</p>
+<aside class="kbox kbox-note">
+  <div class="kbox-label">SVDの見方</div>
+  <div class="kbox-body">
+<p>SVDは、一般行列 \(A\) を直接固有値分解するというより、対称行列 \(A^\top A\) と \(AA^\top\) の固有値分解を通じて、入力方向と出力方向を同時に整理する分解である。</p>
+  </div>
+</aside>
+<p>つまり、SVDは「一般行列そのものを対角化している」のではない。むしろ、<br>
+\[
+  A^\top A
+\]<br>
+および<br>
+\[
+  AA^\top
+\]<br>
+という二つの対称行列の固有値分解を利用して構成されている。ここでも、対称行列で直交固有ベクトルが取れるという性質が土台になっている。</p>
+<h2 id="section-2-5">2.5 情報量（自由度）の観点</h2>
+<p>ここでは、行列がどれだけの独立な情報を持っているかを、自由度の観点から説明する。</p>
+<h3 id="section-2-5-1">2.5.1 一般の \(n\times n\) 行列</h3>
+<p>一般の $n\times n$ 行列は、各成分を独立に指定できるので、独立な成分数は<br>
+\[
+  n^2
+\]<br>
+である。</p>
+<p>また、ランク $k$ の行列全体の自由度は<br>
+\[
+  k(2n-k)
+\]<br>
+となる。ランク $k$ の行列は、SVDで見れば、左特異ベクトル、右特異ベクトル、特異値によって表される。ただし、これらのベクトルには直交制約があるため、単純に成分数を足すだけではなく、制約の分だけ自由度が減る。その結果、自由度は $k(2n-k)$ になる。</p>
+<h3 id="section-2-5-2">2.5.2 対称行列</h3>
+<p>対称条件<br>
+\[
+  A=A^\top
+\]<br>
+によって、<br>
+\[
+  a_{ij}=a_{ji}
+\]<br>
+という条件が課される。これは、上三角成分と下三角成分が同じでなければならないという条件であり、<br>
+\[
+  \frac{n(n-1)}2
+\]<br>
+個の自由度が失われる。したがって、対称行列全体の自由度は<br>
+\[
+  \begin{aligned}
+  n^2-\frac{n(n-1)}2
+  &=
+  \frac{n(n+1)}2
+  \end{aligned}
+\]<br>
+となる。</p>
+<p>また、ランク $k$ の対称行列全体の自由度は<br>
+\[
+  kn-\frac{k(k-1)}2
+\]<br>
+である。</p>
+<p>対称行列では、固有ベクトルを左右別々に選ぶ必要がない。一般行列のSVDでは左側と右側の方向を別々に持つが、対称行列ではその二つが一致する。そのため、一般行列よりも必要な情報量が少なくなる。</p>
+<h2 id="section-2-6">2.6 SVDと固有値分解の自由度の差</h2>
+<p>ランク $k$ の場合、一般行列と対称行列の自由度の差は<br>
+\[
+  \begin{aligned}
+  k(2n-k)
+  -
+  \left(
+  kn-\frac{k(k-1)}2
+  \right)
+  &=
+  kn-\frac{k(k+1)}2
+  \end{aligned}
+\]<br>
+となる。これは<br>
+\[
+  (n-1)+(n-2)+\cdots +(n-k)
+\]<br>
+と書くことができる。</p>
+<p>この量は、SVDでは左右別々に存在していた特異ベクトル空間<br>
+\[
+  U,\quad V
+\]<br>
+に対して、対称行列では<br>
+\[
+  U=V
+\]<br>
+という条件を課すことで失われる自由度そのものである。</p>
+<p>特に $k=n$ の場合、<br>
+\[
+  \begin{aligned}
+  n^2-
+  \frac{n(n+1)}2
+  &=
+  \frac{n(n-1)}2
+  \end{aligned}
+\]<br>
+となり、これは「行列が対称である」という条件によって減少する自由度と完全に一致する。</p>
+<aside class="kbox kbox-proposition" id="prop-svd-eigen-dof">
+  <div class="kbox-label">命題 2.1（SVDと固有値分解の自由度差）</div>
+  <div class="kbox-body">
+<p>ランク \(k\) の一般行列の自由度は \(k(2n-k)\)、ランク \(k\) の対称行列の自由度は<br>
+\[
+  kn-\frac{k(k-1)}2
+\]<br>
+である。</p>
+<p>したがって、両者の自由度の差は<br>
+\[
+  kn-\frac{k(k+1)}2
+  =
+  (n-1)+(n-2)+\cdots+(n-k)
+\]<br>
+である。</p>
+  </div>
+</aside>
+<p>したがって、対称行列の固有値分解は、SVDに対して「左右の特異ベクトルを一致させた特殊な場合」であると理解することができる。</p>
+<p>ただし、これは直感的な理解として述べている。厳密には、対称行列の固有値は正にも負にもなり得る一方、SVDの特異値は常に非負である。そのため、対称行列の固有値分解とSVDを完全に同一視するのではなく、「対称性によって左右の方向が一致する」という構造に注目して理解するのがよい。</p>
+<h2 id="section-2-7">2.7 演習</h2>
+<aside class="kexercise kexercise-standard" data-level="standard" id="ex-svd-eigen-dof">
+  <div class="kexercise-header">
+    <div class="kexercise-label">演習 2.1（自由度差の確認）</div>
+    <div class="kexercise-level">standard</div>
+  </div>
+  <div class="kexercise-body">
+<p>\(n=5,\ k=2\) のとき、ランク \(k\) の一般行列の自由度と、ランク \(k\) の対称行列の自由度をそれぞれ計算し、その差が<br>
+\[
+  (n-1)+(n-2)
+\]<br>
+に一致することを確認せよ。</p>
+  </div>
+</aside>
+<details class="khint">
+  <summary>ヒント</summary>
+  <div class="khint-body">
+<p>一般行列の自由度は \(k(2n-k)\)、対称行列の自由度は<br>
+\[
+  kn-\frac{k(k-1)}2
+\]<br>
+を使えばよい。</p>
+  </div>
+</details>
+<details class="kanswer">
+  <summary>解答</summary>
+  <div class="kanswer-body">
+<p>\(n=5,\ k=2\) のとき、一般行列の自由度は<br>
+\[
+  2(10-2)=16
+\]<br>
+である。</p>
+<p>対称行列の自由度は<br>
+\[
+  2\cdot5-\frac{2(2-1)}2
+  =
+  10-1
+  =
+  9
+\]<br>
+である。</p>
+<p>したがって差は<br>
+\[
+  16-9=7
+\]<br>
+である。</p>
+<p>一方、<br>
+\[
+  (n-1)+(n-2)=4+3=7
+\]<br>
+なので一致する。</p>
+  </div>
+</details>
   </main>
 
   <footer class="book-footer">

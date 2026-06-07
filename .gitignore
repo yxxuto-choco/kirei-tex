@@ -1,5 +1,2 @@
 __pycache__/
 *.pyc
-dist/assets/
-dist/sample-*.html
-dist/book*.html

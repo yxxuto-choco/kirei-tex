@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>二次形式とヘッセ行列</title>
+  <link rel="stylesheet" href="assets/kirei.css">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["$", "$"], ["\\(", "\\)"]],
+        displayMath: [["\\[", "\\]"], ["$$", "$$"]],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: "global"
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body class="theme-rich scroll-vertical">
+  <header class="book-header">
+    <div class="book-kicker">Kirei TeX prototype</div>
+    <h1>二次形式とヘッセ行列</h1>
+    <p class="book-subtitle">混合項が凸性を壊す例</p>
+    <div class="book-actions" aria-label="表示設定">
+      <label class="advanced-toggle">
+        <input id="advanced-toggle" type="checkbox">
+        <span id="advanced-toggle-label">発展を表示</span>
+      </label>
+      <fieldset class="theme-switcher" aria-label="表示モード">
+        <legend>表示</legend>
+        <button type="button" data-theme-choice="rich">リッチ</button>
+        <button type="button" data-theme-choice="mono">白黒</button>
+      </fieldset>
+      <fieldset class="scroll-switcher" aria-label="スクロールモード">
+        <legend>読方向</legend>
+        <button type="button" data-scroll-choice="vertical">縦</button>
+        <button type="button" data-scroll-choice="horizontal">横</button>
+      </fieldset>
+    </div>
+  </header>
+
+  <main class="book-page">
+<details class="ktoc" open>
+  <summary>目次</summary>
+  <ol>
+    <li class="ktoc-level-1"><a href="#section-1">1 二次形式を眺める</a></li>
+    <li class="ktoc-level-1"><a href="#section-2">2 ヘッセ行列で確認する</a></li>
+    <li class="ktoc-level-2"><a href="#section-2-1">2.1 二階微分による凸性判定</a></li>
+    <li class="ktoc-level-1"><a href="#section-3">3 混合項の見方</a></li>
+    <li class="ktoc-level-1"><a href="#section-4">4 発展: 判別式で一瞬で見る</a></li>
+    <li class="ktoc-level-1"><a href="#section-5">5 まとめ</a></li>
+  </ol>
+</details>
+<h2 id="section-1">1. 二次形式を眺める</h2>
+<p>二変数関数<br>
+\[
+  f(x,y)=x^2+y^2+3xy
+\]<br>
+を考える。$x^2$ と $y^2$ の係数はどちらも正である。<br>
+しかし、このことだけでは $f$ が凸であるとは限らない。<span class="kgap" data-kgap><button class="kgap-trigger" type="button" aria-expanded="false" aria-controls="kgap-1" data-kgap-target="kgap-1">?</button><span id="kgap-1" class="kgap-popover" role="note" hidden>「平方の係数が正なら上に開いている」という一変数の直感を、そのまま二変数へ持ち込むと危ない。二変数では $xy$ のような混合項が曲がり方を変える。</span></span></p>
+<aside class="kbox kbox-example" id="ex-not-convex">
+  <div class="kbox-label">例 1.1（正の係数だけでは足りない）</div>
+  <div class="kbox-body">
+<p>$y=-x$ とおくと<br>
+\[
+  f(x,-x)=x^2+x^2-3x^2=-x^2
+\]<br>
+となる。原点を通る直線 $y=-x$ に沿って見ると、グラフは上に開くどころか下に開いている。<br>
+したがって $f$ は凸ではない。</p>
+  </div>
+</aside>
+<h2 id="section-2">2. ヘッセ行列で確認する</h2>
+<p>二階微分をまとめた行列をヘッセ行列という。この関数では<br>
+\[
+  H_f=
+  \begin{pmatrix}
+    2 & 3\\
+    3 & 2
+  \end{pmatrix}
+\]<br>
+である。<br>
+<a class="kref" href="#ex-not-convex">例 1.1</a> の現象は、ヘッセ行列の固有値を見るとすぐに説明できる。</p>
+<h3 id="section-2-1">2.1 二階微分による凸性判定</h3>
+<aside class="kbox kbox-theorem" id="thm-hessian">
+  <div class="kbox-label">定理 2.1（ヘッセ行列による凸性判定）</div>
+  <div class="kbox-body">
+<p>領域上で二階微分可能な関数 $f$ が凸であるためには、各点のヘッセ行列 $H_f$ が半正定値であることが必要である。<br>
+さらに領域が凸で、すべての点で $H_f$ が半正定値なら、$f$ は凸である。<span class="kgap" data-kgap><button class="kgap-trigger" type="button" aria-expanded="false" aria-controls="kgap-2" data-kgap-target="kgap-2">?</button><span id="kgap-2" class="kgap-popover" role="note" hidden>ここでは厳密な証明よりも、ヘッセ行列が「全方向の二階微分」をまとめている、という直感を大切にする。</span></span></p>
+  </div>
+</aside>
+<details class="kproof">
+  <summary>証明</summary>
+  <div class="kproof-body">
+<p>方向ベクトル $v$ に沿って $g(t)=f(p+tv)$ とおく。<br>
+一変数関数 $g$ の二階微分は<br>
+\[
+  g''(0)=v^\mathsf{T}H_f(p)v
+\]<br>
+である。$f$ が凸なら、任意の直線上で見た $g$ も凸であるため $g''(0)\ge 0$ となる。<br>
+したがって任意の $v$ について $v^\mathsf{T}H_f(p)v\ge 0$ であり、$H_f(p)$ は半正定値である。</p>
+    <div class="qed" aria-label="証明終わり">□</div>
+  </div>
+</details>
+<details class="kfold">
+  <summary>固有値で見る</summary>
+  <div class="kfold-body">
+<p>行列<br>
+\[
+  \begin{pmatrix}
+    2 & 3\\
+    3 & 2
+  \end{pmatrix}
+\]<br>
+の固有値は $5$ と $-1$ である。<br>
+負の固有値があるので、このヘッセ行列は半正定値ではない。</p>
+<p>実際、方向ベクトル $v=(1,-1)$ に対して<br>
+\[
+  v^\mathsf{T}H_fv=-2<0
+\]<br>
+となり、その方向には下向きに曲がっている。</p>
+  </div>
+</details>
+<p><a class="kref" href="#thm-hessian">定理 2.1</a> を使えば、二次関数の凸性は係数の見た目ではなく行列の半正定値性として調べられる。</p>
+<h2 id="section-3">3. 混合項の見方</h2>
+<p>一般の二次形式<br>
+\[
+  q(x,y)=ax^2+2bxy+cy^2
+\]<br>
+は、行列<br>
+\[
+  A=
+  \begin{pmatrix}
+    a & b\\
+    b & c
+  \end{pmatrix}
+\]<br>
+を使って $q(x,y)=v^\mathsf{T}Av$ と書ける。ただし $v=(x,y)^\mathsf{T}$ である。</p>
+<aside class="kbox kbox-note">
+  <div class="kbox-label">係数を見る場所</div>
+  <div class="kbox-body">
+<p>$x^2$ と $y^2$ の係数 $a,c$ だけでなく、混合項の係数 $2b$ も行列の非対角成分として効いてくる。<br>
+$a>0$ かつ $c>0$ でも、$b$ が大きすぎると負に曲がる方向が生まれる。</p>
+  </div>
+</aside>
+<aside class="kexercise kexercise-standard" data-level="standard" id="ex-mixed-term">
+  <div class="kexercise-header">
+    <div class="kexercise-label">演習 3.1（混合項の強さ）</div>
+    <div class="kexercise-level">standard</div>
+  </div>
+  <div class="kexercise-body">
+<p>二次形式<br>
+\[
+  q_t(x,y)=x^2+y^2+txy
+\]<br>
+が凸であるような実数 $t$ の範囲を求めよ。</p>
+<details class="khint">
+  <summary>ヒント</summary>
+  <div class="khint-body">
+<p>対応する対称行列は<br>
+\[
+  \begin{pmatrix}
+    1 & t/2\\
+    t/2 & 1
+  \end{pmatrix}
+\]<br>
+である。$2\times2$ の正定値・半正定値条件を使う。</p>
+  </div>
+</details>
+<details class="kanswer">
+  <summary>解答例</summary>
+  <div class="kanswer-body">
+<p>半正定値であればよいので、主対角成分が非負で、行列式が非負であればよい。<br>
+ここでは主対角成分はどちらも $1$ であり、<br>
+\[
+  1-\left(\frac{t}{2}\right)^2\ge 0
+\]<br>
+が必要十分である。したがって $-2\le t\le 2$ である。</p>
+  </div>
+</details>
+  </div>
+</aside>
+<p><a class="kref" href="#ex-mixed-term">演習 3.1</a> は、混合項がどの程度まで許されるかを自分の手で確かめるための練習である。</p>
+<div class="kadvanced-notice" data-advanced-notice>
+  <span class="kadvanced-notice-label">発展内容があります</span>
+  <span class="kadvanced-notice-text">上の「発展を表示」をオンにすると読めます。</span>
+</div>
+<section class="kadvanced" data-advanced>
+  <div class="kadvanced-ribbon">発展</div>
+  <div class="kadvanced-body">
+<h2 id="section-4">4. 発展: 判別式で一瞬で見る</h2>
+<p>$2\times2$ の対称行列<br>
+\[
+  A=
+  \begin{pmatrix}
+    a & b\\
+    b & c
+  \end{pmatrix}
+\]<br>
+が正定値であるためには、$a>0$ かつ $ac-b^2>0$ が必要十分である。</p>
+<p>今回の例では $f(x,y)=x^2+y^2+3xy$ なので、$a=1,c=1,2b=3$、つまり $b=3/2$ である。<br>
+したがって<br>
+\[
+  ac-b^2=1-\left(\frac{3}{2}\right)^2=-\frac{5}{4}<0
+\]<br>
+となり、正定値ではない。</p>
+<details class="kfold">
+  <summary>なぜ $2bxy$ と書くのか</summary>
+  <div class="kfold-body">
+<p>行列表示では<br>
+\[
+  \begin{pmatrix}x&y\end{pmatrix}
+  \begin{pmatrix}a&b\\b&c\end{pmatrix}
+  \begin{pmatrix}x\\y\end{pmatrix}
+  =ax^2+2bxy+cy^2
+\]<br>
+となる。対称行列の上下の非対角成分が、どちらも $xy$ に寄与するためである。</p>
+  </div>
+</details>
+  </div>
+</section>
+<h2 id="section-5">5. まとめ</h2>
+<p>$x^2,y^2$ の係数が正でも、混合項が強いと凸性は失われる。<br>
+多変数の二次関数では、係数をばらばらに見るのではなく、ヘッセ行列や対応する対称行列の半正定値性を見るのが自然である。</p>
+  </main>
+
+  <footer class="book-footer">
+    <p>Generated by <code>src/build.py</code> at 2026-06-08 05:13.</p>
+  </footer>
+
+  <script src="assets/kirei.js"></script>
+</body>
+</html>
