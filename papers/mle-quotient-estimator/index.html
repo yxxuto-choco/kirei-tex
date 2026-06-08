@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,8 +7,8 @@
   <script>
     window.MathJax = {
       tex: {
-        inlineMath: [["\\(", "\\)"]],
-        displayMath: [["\\[", "\\]"]],
+        inlineMath: [["\(", "\)"]],
+        displayMath: [["\[", "\]"]],
         processEscapes: true
       },
       svg: { fontCache: "global" }
@@ -30,7 +30,6 @@
       --sans: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", system-ui, sans-serif;
       --serif: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif CJK JP", serif;
     }
-
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
@@ -56,419 +55,203 @@
       --shadow: none;
       background: #ffffff;
     }
-
     a { color: inherit; }
-    .page,
-    .masthead,
-    .footer {
-      width: min(100% - 32px, 940px);
-      margin-inline: auto;
+    .page, .masthead, .footer { width: min(100% - 32px, 940px); margin-inline: auto; }
+    .masthead { padding: 56px 0 26px; }
+    .kicker { margin: 0 0 0.45rem; color: var(--accent); font-family: var(--sans); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+    h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 700; line-height: 1.25; }
+    .title { font-size: clamp(2.1rem, 5vw, 3.6rem); letter-spacing: -0.03em; max-width: 14ch; }
+    .page { display: grid; gap: 22px; padding-bottom: 40px; }
+    .tools { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .toggle-card {
+      display: inline-flex; align-items: center; gap: 10px;
+      border: 1px solid var(--line-strong); background: rgba(255,255,255,0.78);
+      padding: 10px 12px; box-shadow: var(--shadow);
+      font-family: var(--sans); font-size: 0.9rem;
     }
-
-    .masthead {
-      padding: 56px 0 26px;
-    }
-    .kicker {
-      margin: 0 0 0.45rem;
-      color: var(--accent);
-      font-family: var(--sans);
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-    h1, h2, h3 {
-      font-feature-settings: "palt";
-      line-height: 1.35;
-      letter-spacing: -0.02em;
-    }
-    h1 {
-      margin: 0;
-      font-size: clamp(2rem, 5.5vw, 4rem);
-    }
-    .subtitle {
-      margin: 1rem 0 0;
-      color: var(--muted);
-      font-size: clamp(1rem, 2vw, 1.15rem);
-      max-width: 760px;
-    }
-    .toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: center;
-      margin-top: 1.5rem;
-      font-family: var(--sans);
-      font-size: 0.92rem;
-    }
-    .toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.3rem;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.8);
-    }
-    .toggle-label {
-      margin-right: 0.35rem;
-      padding-left: 0.45rem;
-      color: var(--muted);
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-    }
-    .mode-button {
-      appearance: none;
-      border: 0;
-      padding: 0.45rem 0.72rem;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      font: inherit;
-      font-weight: 700;
-    }
-    .mode-button:hover,
-    .mode-button:focus-visible {
-      outline: none;
-      background: var(--accent-soft);
-      color: var(--ink);
-    }
-    .mode-button.is-active {
-      background: var(--ink);
-      color: var(--sheet);
-    }
-    .page { padding: 16px 0 72px; }
-    .lede {
-      margin: 0 0 1.6rem;
-      padding: 1rem 1.1rem;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.76);
-      color: var(--muted);
-      font-size: 0.98rem;
-    }
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.9rem;
-      margin-bottom: 1.6rem;
-    }
-    .summary-card {
-      padding: 1rem 1.05rem;
-      border: 1px solid var(--line);
-      background: var(--sheet);
-      box-shadow: var(--shadow);
-    }
-    .summary-card h2 {
-      margin: 0 0 0.55rem;
-      font-size: 1rem;
-    }
-    .summary-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-    .article {
-      padding: clamp(1.2rem, 3.8vw, 2rem);
-      border: 1px solid var(--line-strong);
-      background: var(--sheet);
-      box-shadow: var(--shadow);
-    }
-    .article h2 {
-      margin: 0 0 1rem;
-      padding-bottom: 0.7rem;
-      border-bottom: 1px solid var(--line-strong);
-      font-size: clamp(1.45rem, 3vw, 2.1rem);
-    }
-    .section-note {
-      margin: 0 0 1.4rem;
-      color: var(--muted);
-    }
-    .callout {
-      margin: 1rem 0 1.2rem;
-      padding: 0.95rem 1rem;
-      border: 1px solid var(--line);
-      border-left: 4px solid var(--accent);
-      background: var(--accent-soft);
-    }
-    .callout strong {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-family: var(--sans);
-    }
-    .box {
-      margin: 1rem 0 1.2rem;
-      padding: 1rem 1.1rem;
-      border: 1px solid var(--line);
-      background: #fff;
-    }
-    .box-title {
-      margin: 0 0 0.5rem;
-      font-family: var(--sans);
-      font-size: 0.88rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: var(--accent-2);
-      text-transform: uppercase;
-    }
-    .math-block {
-      margin: 1rem 0;
-      text-align: center;
-      overflow-x: auto;
-      padding: 0.2rem 0;
-    }
-    .note-list {
-      margin: 0.8rem 0 1rem 1.2rem;
-      padding: 0;
-    }
-    .note-list li { margin: 0.25rem 0; }
-    details {
-      margin: 0.9rem 0 1rem;
-      border: 1px solid var(--line);
-      background: var(--sheet);
-    }
-    summary {
-      padding: 0.85rem 1rem;
-      cursor: pointer;
-      font-family: var(--sans);
-      font-weight: 700;
-      user-select: none;
-      list-style: none;
-    }
-    summary::-webkit-details-marker { display: none; }
-    summary::before {
-      content: "＋";
-      margin-right: 0.55rem;
-      color: var(--accent);
-    }
-    details[open] summary {
-      border-bottom: 1px solid var(--line);
-      background: #faf6ef;
-    }
-    details[open] summary::before { content: "－"; }
-    .detail-body {
-      padding: 1rem 1.1rem 1.2rem;
-    }
-    .detail-body p {
-      margin: 0 0 1rem;
-    }
-    .detail-body p:last-child { margin-bottom: 0; }
-    .footer {
-      padding: 0 0 48px;
-      color: var(--muted);
-      font-family: var(--sans);
-      font-size: 0.82rem;
-      text-align: center;
-    }
-    mjx-container[jax="SVG"] {
-      max-width: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
-    }
+    .toggle-card .label { font-size: 0.74rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); display:block; margin-bottom: 4px; }
+    .theme-switch { display: inline-flex; gap: 2px; border: 1px solid var(--line-strong); background: var(--sheet); padding: 2px; }
+    .theme-switch button { border: 0; background: transparent; color: var(--muted); font: inherit; padding: 8px 12px; cursor: pointer; }
+    .theme-switch button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+    article { background: var(--sheet); border: 1px solid var(--line); box-shadow: var(--shadow); padding: clamp(18px, 3.4vw, 34px); }
+    .lead { color: var(--muted); font-family: var(--sans); margin-bottom: 1.2rem; }
+    h2.section { margin: 1.8rem 0 1rem; font-size: clamp(1.5rem, 3vw, 2.25rem); }
+    p { margin: 0 0 1rem; }
+    .klist { margin: 0 0 1rem 1.25rem; padding: 0; }
+    .klist li { margin: 0 0 .55rem; padding-left: .4rem; }
+    .math-display { overflow-x: auto; margin: 1rem 0; padding: 0.4rem 0; }
+    .paper-fold { border: 1px solid var(--line-strong); background: rgba(255,255,255,0.85); margin: 1rem 0; }
+    .paper-fold > summary { list-style: none; cursor: pointer; padding: 0.8rem 1rem; font-family: var(--sans); font-weight: 700; }
+    .paper-fold > summary::-webkit-details-marker { display: none; }
+    .paper-fold .fold-body { padding: 0 1rem 1rem; }
+    .xref { text-decoration: underline; text-underline-offset: 0.15em; }
+    .footer { color: var(--muted); font-family: var(--sans); padding: 18px 0 48px; font-size: .9rem; }
     @media (max-width: 760px) {
-      body {
-        font-size: 16px;
-        line-height: 1.85;
-      }
-      .masthead {
-        padding-top: 34px;
-      }
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-      .toggle {
-        width: 100%;
-        justify-content: space-between;
-      }
-      .mode-button {
-        flex: 1;
-      }
-      .article {
-        padding: 1.1rem;
-      }
-    }
-    @media print {
-      :root {
-        --paper: #fff;
-        --sheet: #fff;
-        --ink: #000;
-        --muted: #333;
-        --line: #bfbfbf;
-        --line-strong: #333;
-        --accent: #000;
-        --accent-soft: #fff;
-        --accent-2: #000;
-        --shadow: none;
-      }
-      body {
-        background: #fff !important;
-        font-size: 11pt;
-        line-height: 1.72;
-      }
-      .toolbar,
-      .footer {
-        display: none;
-      }
-      .summary-card,
-      .article,
-      .lede,
-      details {
-        box-shadow: none;
-        break-inside: avoid;
-        page-break-inside: avoid;
-      }
-      details, .detail-body { display: block; }
-      details summary { border-bottom: 1px solid var(--line); }
+      body { font-size: 16px; }
+      .masthead { padding-top: 28px; }
+      .title { max-width: none; }
     }
   </style>
 </head>
 <body class="mode-rich">
-  <header class="masthead">
-    <p class="kicker">Paper Reader / KireiUI Trial</p>
-    <h1>2507.05628: Section 3.1</h1>
-    <p class="subtitle">MLE via Quotient Estimator を、長い本文を追わなくても要点が見える形に並べた試作です。</p>
-    <div class="toolbar" aria-label="表示設定">
-      <div class="toggle" role="group" aria-label="表示モード">
-        <span class="toggle-label">表示</span>
-        <button class="mode-button is-active" type="button" data-mode="rich" aria-pressed="true">リッチ</button>
-        <button class="mode-button" type="button" data-mode="mono" aria-pressed="false">白黒</button>
+  <header class="masthead page">
+    <p class="kicker">ArXiv 2507.05628 ? Section 3.1</p>
+    <h1 class="title">MLE via Quotient Estimator</h1>
+    <div class="tools">
+      <div class="toggle-card">
+        <div>
+          <span class="label">Display</span>
+          <div class="theme-switch" role="group" aria-label="Theme switch">
+            <button type="button" data-theme="rich" aria-pressed="true">Rich</button>
+            <button type="button" data-theme="mono" aria-pressed="false">Mono</button>
+          </div>
+        </div>
       </div>
     </div>
   </header>
-
   <main class="page">
-    <p class="lede">この節では、観測モデルのパラメータ \(\mu\) をそのまま最適化するのではなく、同じ \(h=K\mu\) を与える同値類の上で考えることで、推定問題を quotient space に落とし込んでいます。</p>
+    <article>
 
-    <section class="summary-grid" aria-label="要点">
-      <div class="summary-card">
-        <h2>1. 何をしているか</h2>
-        <p>MLE を \(h=K\mu\) だけが本質になるように書き直し、同じ観測を与える \(\mu\) の冗長性を quotient で消しています。</p>
-      </div>
-      <div class="summary-card">
-        <h2>2. なぜ必要か</h2>
-        <p>\(\mu\) は一意でなくても \(h_0\) は一意に定まるので、推定対象は \(\mu\) そのものより \([\mu]\) です。</p>
-      </div>
-      <div class="summary-card">
-        <h2>3. 結論</h2>
-        <p>\(\hat h_\varepsilon = K\hat\mu_\varepsilon\) は \(\varepsilon \to 0\) で真の \(h_0\) に近づく、という主張がこの節の核です。</p>
-      </div>
-    </section>
+<p>This section presents <q>functional</q> estimator via maximum likelihood form.</p>
+<p>In this section, we consider the following situation of small noise asymptotic statistical inference.</p>
+<ul class="klist">
+  <li>Let \(Z\sim \mathcal{N}(0,\K)\) and \(K\) be the covariance function of \(Z\) corresponding to \(\K\).</li>
+  <li>We observe \(X^arepsilon=h_0+arepsilon Z \sim N(h_0,arepsilon^2 \K)\) for some \(arepsilon>0\), where
+    <ul class="klist">
+      <li>Let \(\K\) (resp.\ \(K\)) be the known covariance operator (resp.\ covariance function).</li>
+      <li>Let \(h_0 \coloneqq h_{	heta_0}=\K \mu_{	heta_0}\in \HP\) be an unknown true mean function with \(\mu_0 \coloneqq \mu_{	heta_0}\in\MM\) which are parameterized for \(	heta_0\in \Theta\).</li>
+    </ul>
+  </li>
+</ul>
 
-    <article class="article">
-      <h2>Section 3.1. MLE via Quotient Estimator</h2>
-      <p class="section-note">このページでは、説明の流れを「問題設定」「quotient の導入」「推定量」「収束の主張」に分けています。</p>
-
-      <div class="box">
-        <p class="box-title">Notation</p>
-        <p>観測モデルは、平均関数 \(h_0\) を通して書くと \(h_0 = K\mu_0\) の形になります。ここで \(K\) は線形作用素、\(\mu_0\) は潜在パラメータです。</p>
-        <div class="math-block">\[
-        h_0 = K\mu_0
-        \]</div>
-        <p>ただし、\(\mu_0\) は一意ではなく、同じ \(h_0\) を与える \(\mu\) が複数あります。そのため、\(\mu\) 自体ではなく同値類 \([\mu]\) を扱います。</p>
-      </div>
-
-      <details open>
-        <summary>なぜ quotient space が出てくるのか</summary>
-        <div class="detail-body">
-          <p>この節の出発点は、観測に現れるのは \(\mu\) の全成分ではなく、\(K\mu\) だけだという点です。したがって、\(\ker K\) に沿った違いは観測上区別できません。</p>
-          <p>そこで、\(\mathcal{M}(T)\) を \(\ker K\) で割った quotient space を考え、\(\mu\) の冗長性を消します。</p>
-          <div class="math-block">\[
-          \mathcal{M}_f = \mathcal{M}(T) / \ker K
-          \]</div>
-          <p>この見方を採ると、「どの \(\mu\) を選ぶか」ではなく、「どの同値類 \([\mu]\) が最尤か」を問う問題に整理できます。</p>
-        </div>
-      </details>
-
-      <div class="callout">
-        <strong>核心</strong>
-        MLE は、元のパラメータ空間で直接最適化するのではなく、同じ観測を表す同値類の空間で最適化するのが自然です。
-      </div>
-
-      <div class="box">
-        <p class="box-title">Estimator</p>
-        <p>節の主張は、尤度関数 \(\Phi_\varepsilon\) を quotient space 上で最大化する推定量として書かれます。</p>
-        <div class="math-block">\[
-        \hat\mu_\varepsilon = \arg\max_{[\mu] \in \Theta_e} \Phi_\varepsilon([\mu])
-        \]</div>
-        <p>そして、推定した平均関数は</p>
-        <div class="math-block">\[
-        \hat h_\varepsilon = K\hat\mu_\varepsilon
-        \]</div>
-        <p>で与えられます。ここで大事なのは、\(\hat\mu_\varepsilon\) そのものより \([\hat\mu_\varepsilon]\) が意味を持つ、という点です。</p>
-      </div>
-
-      <details>
-        <summary>収束の主張を読む</summary>
-        <div class="detail-body">
-          <p>この節の最後では、ノイズが小さくなる極限で、推定された同値類と平均関数が真の対象へ近づくことが述べられています。</p>
-          <div class="math-block">\[
-          [\hat\mu_\varepsilon] \to [\mu_0]
-          \qquad
-          \hat h_\varepsilon \to h_0
-          \quad (\varepsilon \to 0)
-          \]</div>
-          <p>要するに、quotient estimator にすると、推定が「パラメータの取り方」に依存しない形に整います。ここが、この節を読むときの一番のポイントです。</p>
-        </div>
-      </details>
-
-      <details>
-        <summary>読み方のメモ</summary>
-        <div class="detail-body">
-          <ul class="note-list">
-            <li>\(h_0 = K\mu_0\) は「観測に効く量」だけを抜き出した式です。</li>
-            <li>\(\ker K\) は観測に見えない方向で、その分だけ \(\mu\) に自由度があります。</li>
-            <li>\(\Theta_e\) は最適化の場を quotient space に移した記法だと読むと追いやすいです。</li>
-            <li>この節は「\(\mu\) を直接当てる」のではなく、「同じ \(h\) をもつクラスの中で最尤のものを選ぶ」話です。</li>
-          </ul>
-        </div>
-      </details>
+<details class="paper-fold"><summary>Notation</summary><div class="fold-body"><div class="math-display">\[
+        \MMM\coloneqq \MM /\ker \K,
+\]</div>
+<p>with the quotient norm.</p></div></details>
+<p>In order to define estimators on the quotient space \(\widetilde{M}\), the following properties are important.</p>
+<details class="paper-fold"><summary>Proposition</summary><div class="fold-body"><p>Then, the map</p>
+<div class="math-display">\[
+        [\mu] \mapsto \innerp{\mu,y} - \frac12 \innerp{\mu,\K\mu}
+\]</div>
+<p>is well-defined; that is, it does not depend on the choice of a representative \([\mu]\). Moreover, the map is continuous with respect to the quotient norm.</p></div></details>
+<details class="paper-fold"><summary>Proof</summary><div class="fold-body"><p>let \(\mu_1\) and \(\mu_2\) satisfy \(\mu_1-\mu_2\in\ker \K\). For fixed \(y\in\overline{\K(\M)}\), take a sequence \(\{\nu_n\}\subset\MM\) such that \(\K\nu_n\) converges to \(y\) in  \(C[0,T]\). Since \(\K\) is symmetric, it follows that</p>
+<div class="math-display">\[
+\begin{aligned}
+            \innerp{\mu_1,y} - \innerp{\mu_2,y}
+            &amp;= \innerp*{ \mu_1 - \mu_2 , \lim_{n\to\infty} \K \nu_n }
+            = \lim_{n\to\infty} \innerp{ \mu_1 - \mu_2 , \K \nu_n } \\
+            &amp;= \lim_{n\to\infty} \innerp{ \nu_n , \K (\mu_1 - \mu_2) }
+            = 0,
+\end{aligned}
+\]</div>
+<p>and that</p>
+<div class="math-display">\[
+            \innerp{ \mu_1,\K\mu_1 } - \innerp{ \mu_2,\K\mu_2 }
+            = \innerp{ \mu_1+\mu_2,\K(\mu_1-\mu_2) } = 0, 
+\]</div>
+<p>which shows the well-definedness.</p>
+<p>For the continuity, we suppose that \([\mu_n]\to[\mu]\) in \(\MMM\) as \(n\to \infty\). Then,</p>
+<div class="math-display">\[
+\begin{aligned}
+            &amp;\abs{ \qty( \innerp{\mu_n,y} - \frac12 \innerp{\mu_n,\K\mu_n} ) 
+                - \qty( \innerp{\mu,y} - \frac12 \innerp{\mu,\K\mu} ) }\\
+            &amp;\qquad\qquad\qquad\qquad = \abs{ \innerp*{ \mu_n-\mu, y } } 
+                + \frac12 \abs{ \innerp*{ \mu_n+\mu, \K (\mu_n-\mu) } }
+\end{aligned}
+\]</div>
+<p>When we use \(\{\nu_m\}\) taken above again, it follows from <a class=?xref? href=?#lem-sym_schwartz?>Lemma</a> that</p>
+<div class="math-display">\[
+\begin{aligned}
+            \abs{ \innerp*{ \mu_n-\mu, y } }
+            &amp;= \abs{ \innerp*{ \mu_n-\mu, \lim_{m\to\infty} \K \nu_m } } 
+            = \lim_{m\to\infty} \abs{ \innerp*{ \mu_n-\mu, \K \nu_m } } \\
+            &amp;\leq \lim_{m\to \infty} \SN{\K \nu_m} \MTN{[\mu_n-\mu]}
+            = \SN{y} \MTN{[\mu_n]-[\mu]}\to 0,\quad n\to \infty.
+\end{aligned}
+\]</div>
+<p>Moreover, it follows that</p>
+<div class="math-display">\[
+            \abs{ \innerp*{ \mu_n+\mu, \K (\mu_n-\mu) } }
+            \leq \OPN{\K} \MTN{[\mu_n+\mu]}\MTN{[\mu_n-\mu]}\to 0,
+\]</div>
+<p>as \(n\to \infty\). This ends the proof.</p></div></details>
+<p>According to <a class=?xref? href=?#prop-WelldefContinuousForMLEContrast?>Proposition</a>, we make a contrast function \(\widetilde{\Phi}_\varepsilon\) to estimate \(\mu_0\) as follows:</p>
+<div class="math-display">\[
+      \widetilde{\Phi}_{\varepsilon}([\mu]) \coloneqq \innerp{ \mu,X^\varepsilon } - \frac12 \innerp{ \mu,\K\mu }.
+\]</div>
+<p>Note that</p>
+<div class="math-display">\[
+      \widetilde{\Phi}_{\varepsilon}([\mu]) \asconv \widetilde{\Phi}([\mu]) \coloneqq \innerp{\mu,h_0} - \frac12\innerp{ \mu,\K\mu }
+      \quad (\varepsilon\to0).
+\]</div>
+<details class="paper-fold"><summary>Proposition</summary><div class="fold-body"></div></details>
+<details class="paper-fold"><summary>Proof</summary><div class="fold-body"><p>Since</p>
+<div class="math-display">\[
+        \innerp{\mu,\K\mu_0} - \frac12 \innerp{\mu,\K\mu} 
+        = - \frac12 \innerp{\mu-\mu_0,\K(\mu-\mu_0)}
+          + \frac12 \innerp{\mu_0,\K\mu_0},
+\]</div>
+<p>\([\mu]\in\MMM\) achieves the maximum of \([\mu]\mapsto\innerp{\mu,y} - \frac12 \innerp{\mu,\K\mu}\) if and only if \(\innerp{\mu-\mu_0,\K(\mu-\mu_0)}=0\). Thus, when \([\mu]\in\MMM\) is a maximum point, its representative \(\mu\) always satisfies</p>
+<div class="math-display">\[
+        \norm{I^*(\mu-\mu_0)}_{\HP}^2
+        = \innerp{\mu-\mu_0,\K(\mu-\mu_0)}
+        = 0.
+\]</div>
+<p>This implies that \(\K(\mu-\mu_0)=II^*(\mu-\mu_0)=0\), i.e., \([\mu]=[\mu_0]\).</p></div></details>
+<details class="paper-fold"><summary>Lemma</summary><div class="fold-body"><p>= \overline{H_{P_0}}^{\SN\cdot} = \supp P_0$.</p></div></details>
+<details class="paper-fold"><summary>Proof</summary><div class="fold-body"><p>it is sufficient to show that \(\HP\subset\overline{\K(\M)}^{\SN\cdot}\). Take an arbitrary \(h\in\HP\). Then, there exist \(z\in\XP\) and \(\mu_n\in\MM\) such that \(h=Iz\) and \(\norm{z-I^*\mu_n}_{\XP}\to0\). Since \(\K=II^*\), it follows from <a class=?xref? href=?#prop-OpnormOfIandI-?>Proposition</a> that</p>
+<div class="math-display">\[
+          \SN{h-\K \mu_0} 
+          \leq \norm{\K}_{\mathrm{op}}^{1/2} \norm{z-I^*\mu_n}_{\XP} 
+          \to 0,
+\]</div>
+<p>as \(n\to\infty\).</p></div></details>
+<details class="paper-fold"><summary>Proposition</summary><div class="fold-body"><p>\(\widetilde{\Theta} \subset \MMM\) is compact and \([\mu_0] \in \widetilde{\Theta}\), then \(\displaystyle \argmax_{[\mu] \in \widetilde{\Theta}} \widetilde{\Phi}_\varepsilon(\theta)\) is nonempty.</p></div></details>
+<details class="paper-fold"><summary>Proof</summary><div class="fold-body"></div></details>
+<p>By virtue of <a class=?xref? href=?#prop-nonempty1?>Proposition</a>, we define an MLE \(\hat{h}_\varepsilon\) of the mean function via the <em>quotient estimator</em> \([\hat{\mu}_\varepsilon]\) as</p>
+<div class="math-display">\[
+        \hat{h}_\varepsilon \coloneqq \K \hat{\mu}_\varepsilon
+        \quad \text{via} \quad
+      [\hat{\mu}_\varepsilon] \coloneqq \argmax_{[\mu]\in \widetilde{\Theta}} \widetilde{\Phi}_\varepsilon.
+\]</div>
+<details class="paper-fold"><summary>Theorem</summary><div class="fold-body"><div class="math-display">\[
+          [\hat{\mu}_\varepsilon] \asconv [\mu_0] \ \  \text{in} \ \MMM
+          \quad
+          \hat{h}_\varepsilon \asconv h_0 \ \  \text{in} \ \CC \  \text{and} \  \HP.
+\]</div>
+<p>as \(\varepsilon\to0\).</p></div></details>
+<details class="paper-fold" id="eq-func_conti_contrast_uni_conv"><summary>Proof</summary><div class="fold-body"><p>\begin{equation}\label{eq:func_conti_contrast_uni_conv} \sup_{[\mu] \in \widetilde{\Theta}} \abs{ \widetilde{\Phi}_{\varepsilon} ([\mu])- \widetilde{\Phi}([\mu]) } = \sup_{[\mu] \in \widetilde{\Theta}} \varepsilon \abs{ \innerp*{ \mu, Z } } \asconv 0 \end{equation} as \(\varepsilon \to 0\). It follows from <a class=?xref? href=?#prop-WelldefContinuousForMLEContrast?>Proposition</a> and <a class=?xref? href=?#prop-uniquemaximum?>Proposition</a> that, for any \(\delta&gt;0\),</p>
+<div class="math-display">\[
+        \widetilde{\Phi}\left([\mu_0]\right) &gt; \sup_{\MTN{[\mu]-[\mu_0]}\geq\delta} \widetilde{\Phi}\left([\mu]\right).
+\]</div>
+<p>By the definition of \(\hat{\theta}_{\varepsilon}\),</p>
+<div class="math-display">\[
+        \widetilde{\Phi}_{\varepsilon}([\hat{\mu}_{\varepsilon}]) \ge \widetilde{\Phi}_{\varepsilon}([\mu_0]),
+\]</div>
+<p>Thus, it follows from <a class=?xref? href=?#prop-M-estimator?>Proposition</a> that \([\hat{\mu}_{\varepsilon}] \asconv [\mu_0]\) in \(\MMM\) as \(\varepsilon\to0\). By <a class=?xref? href=?#lem-sym_schwartz?>Lemma</a>, the map \([\mu]  \mapsto \K\mu\) is continuous as the map \(\MMM \to \CC\) or \(\MMM \to \HP\), and therefore, it follows by continuous mapping theorem that \(\hat{h}_\varepsilon \asconv h_0\) in \(\CC\) as \(\varepsilon \to 0\).</p></div></details>
     </article>
   </main>
-
-  <footer class="footer">
-    Based on arXiv:2507.05628, section 3.1. Section text is summarized and reformatted for readability.
+  <footer class="footer page">
+    Section 3.1 of arXiv:2507.05628, presented with a light KireiUI reading layout.
   </footer>
-
   <script>
-    (() => {
-      const KEY = "kirei.paper.mode";
-      const buttons = Array.from(document.querySelectorAll("[data-mode]"));
-
-      const storage = {
-        get() {
-          try { return window.localStorage.getItem(KEY); } catch { return null; }
-        },
-        set(value) {
-          try { window.localStorage.setItem(KEY, value); } catch { /* ignore */ }
-        }
-      };
-
-      const setMode = (mode, persist = true) => {
-        const next = mode === "mono" ? "mono" : "rich";
-        document.body.classList.toggle("mode-mono", next === "mono");
-        document.body.classList.toggle("mode-rich", next === "rich");
-        buttons.forEach((button) => {
-          const active = button.dataset.mode === next;
-          button.classList.toggle("is-active", active);
-          button.setAttribute("aria-pressed", active ? "true" : "false");
-        });
-        if (persist) storage.set(next);
-        if (window.MathJax?.typesetPromise) {
-          window.MathJax.typesetPromise().catch(() => {});
-        }
-      };
-
-      buttons.forEach((button) => {
-        button.addEventListener("click", () => {
-          setMode(button.dataset.mode);
-          window.setTimeout(() => button.blur(), 0);
-        });
-        button.addEventListener("pointerup", () => {
-          window.setTimeout(() => button.blur(), 0);
-        });
-      });
-
-      setMode(storage.get() || "rich", false);
-    })();
+    const root = document.body;
+    const buttons = Array.from(document.querySelectorAll('[data-theme]'));
+    const saved = localStorage.getItem('kirei.theme');
+    const initial = saved === 'mono' ? 'mono' : 'rich';
+    setTheme(initial);
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => setTheme(button.dataset.theme));
+    });
+    function setTheme(theme) {
+      root.classList.toggle('mode-mono', theme === 'mono');
+      root.classList.toggle('mode-rich', theme !== 'mono');
+      buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.theme === theme)));
+      localStorage.setItem('kirei.theme', theme);
+      if (window.MathJax?.typesetPromise) {
+        window.MathJax.typesetPromise().catch(() => {});
+      }
+    }
   </script>
 </body>
 </html>
