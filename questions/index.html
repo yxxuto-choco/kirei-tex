@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>授業内容についての確認質問</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["\\(", "\\)"]],
+        displayMath: [["\\[", "\\]"]],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: "global"
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    :root {
+      --paper: #fffdf8;
+      --sheet: #ffffff;
+      --ink: #1f1c18;
+      --muted: #6f6a62;
+      --subtle: #8b8378;
+      --line: #ddd4c7;
+      --line-strong: #a99f91;
+      --soft: #f5f0e8;
+      --accent: #7b4d26;
+      --accent-soft: #fbf3e7;
+      --shadow: 0 22px 70px rgba(42, 35, 27, 0.12);
+      --sans: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", system-ui, sans-serif;
+      --serif: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif CJK JP", serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, #fbf5eb 0%, var(--paper) 280px, #f8f3eb 100%);
+      font-family: var(--serif);
+      font-size: 18px;
+      line-height: 1.95;
+    }
+
+    body.mode-pdf {
+      --paper: #ffffff;
+      --sheet: #ffffff;
+      --ink: #111111;
+      --muted: #555555;
+      --subtle: #666666;
+      --line: #cfcfcf;
+      --line-strong: #555555;
+      --soft: #ffffff;
+      --accent: #111111;
+      --accent-soft: #ffffff;
+      --shadow: none;
+      background: #ffffff;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .kq-header,
+    .kq-page,
+    .kq-footer {
+      width: min(100% - 32px, 900px);
+      margin-inline: auto;
+    }
+
+    .kq-header {
+      padding: 56px 0 24px;
+    }
+
+    .kq-kicker {
+      margin: 0 0 0.45rem;
+      color: var(--accent);
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-feature-settings: "palt";
+      line-height: 1.35;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5.8vw, 3.8rem);
+      letter-spacing: -0.035em;
+    }
+
+    .kq-lead {
+      max-width: 760px;
+      margin: 1.2rem 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.12rem);
+    }
+
+    .kq-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1.6rem;
+      font-family: var(--sans);
+      font-size: 0.92rem;
+    }
+
+    .kq-toggle {
+      display: inline-flex;
+      gap: 0.25rem;
+      align-items: center;
+      padding: 0.3rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    .mode-pdf .kq-toggle {
+      background: #ffffff;
+    }
+
+    .kq-toggle-label {
+      margin-right: 0.35rem;
+      padding-left: 0.45rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .kq-mode-button {
+      appearance: none;
+      border: 0;
+      padding: 0.45rem 0.72rem;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+
+    .kq-mode-button:hover,
+    .kq-mode-button:focus-visible {
+      background: var(--accent-soft);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .kq-mode-button.is-active {
+      background: var(--ink);
+      color: var(--sheet);
+    }
+
+    .kq-page {
+      padding: 28px 0 72px;
+    }
+
+    .kq-note {
+      margin: 0 0 1.6rem;
+      padding: 1rem 1.1rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .kq-card {
+      margin: 0 0 2rem;
+      padding: clamp(1.25rem, 4vw, 2.1rem);
+      border: 1px solid var(--line-strong);
+      background: var(--sheet);
+      box-shadow: var(--shadow);
+    }
+
+    .mode-pdf .kq-card,
+    .mode-pdf .kq-note {
+      box-shadow: none;
+    }
+
+    .kq-card h2 {
+      margin: 0 0 1rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--line-strong);
+      font-size: clamp(1.45rem, 3vw, 2.05rem);
+      letter-spacing: -0.025em;
+    }
+
+    .kq-question {
+      margin: 0 0 1.35rem;
+      padding: 0.15rem 0 0.15rem 1rem;
+      border-left: 3px solid var(--accent);
+    }
+
+    .kq-question p {
+      margin: 0 0 0.9rem;
+    }
+
+    .kq-question p:last-child {
+      margin-bottom: 0;
+    }
+
+    .kq-details {
+      margin-top: 0.85rem;
+      border: 1px solid var(--line);
+      background: var(--sheet);
+    }
+
+    .kq-details summary {
+      display: flex;
+      gap: 0.6rem;
+      align-items: baseline;
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      font-family: var(--sans);
+      font-weight: 700;
+      line-height: 1.55;
+      user-select: none;
+    }
+
+    .kq-details summary::before {
+      content: "＋";
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .kq-details[open] summary {
+      border-bottom: 1px solid var(--line);
+      background: var(--soft);
+    }
+
+    .kq-details[open] summary::before {
+      content: "－";
+    }
+
+    .kq-detail-body {
+      padding: 1rem clamp(1rem, 3vw, 1.35rem) 1.25rem;
+    }
+
+    .kq-detail-body p {
+      margin: 0 0 1rem;
+    }
+
+    .kq-detail-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    ul,
+    ol {
+      margin: 0.8rem 0 1rem 1.3rem;
+      padding: 0;
+    }
+
+    li {
+      margin: 0.25rem 0;
+    }
+
+    .kq-core {
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--line);
+      background: var(--accent-soft);
+    }
+
+    .mode-pdf .kq-core {
+      background: #ffffff;
+    }
+
+    mjx-container[jax="SVG"] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.1rem 0;
+    }
+
+    .MathJax,
+    mjx-container {
+      font-size: 105%;
+    }
+
+    .kq-footer {
+      padding: 0 0 48px;
+      color: var(--subtle);
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      text-align: center;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        font-size: 16px;
+        line-height: 1.85;
+      }
+
+      .kq-header {
+        padding-top: 34px;
+      }
+
+      .kq-toolbar {
+        align-items: stretch;
+      }
+
+      .kq-toggle {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .kq-mode-button {
+        flex: 1;
+      }
+
+      .kq-card {
+        padding: 1.1rem;
+      }
+
+      .kq-question {
+        padding-left: 0.75rem;
+      }
+    }
+
+    @media print {
+      :root {
+        --paper: #ffffff;
+        --sheet: #ffffff;
+        --ink: #000000;
+        --muted: #333333;
+        --subtle: #555555;
+        --line: #bfbfbf;
+        --line-strong: #333333;
+        --soft: #ffffff;
+        --accent: #000000;
+        --accent-soft: #ffffff;
+        --shadow: none;
+      }
+
+      body {
+        background: #ffffff !important;
+        font-size: 11pt;
+        line-height: 1.75;
+      }
+
+      .kq-header,
+      .kq-page,
+      .kq-footer {
+        width: auto;
+        margin: 0;
+      }
+
+      .kq-header {
+        padding: 0 0 12pt;
+      }
+
+      .kq-toolbar,
+      .kq-footer {
+        display: none;
+      }
+
+      .kq-note,
+      .kq-card,
+      .kq-details {
+        box-shadow: none;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .kq-card {
+        margin-bottom: 18pt;
+      }
+
+      .kq-details,
+      .kq-detail-body {
+        display: block;
+      }
+
+      .kq-details summary {
+        border-bottom: 1px solid var(--line);
+      }
+    }
+  </style>
+</head>
+<body class="mode-normal">
+  <header class="kq-header">
+    <p class="kq-kicker">KIREIUI Question Sheet</p>
+    <h1>授業内容についての確認質問</h1>
+    <p class="kq-lead">以下は、授業内容を否定するためではなく、自分の理解を整理するための確認質問です。詳細な計算は折り畳みに入れています。</p>
+    <div class="kq-toolbar" aria-label="表示設定">
+      <div class="kq-toggle" role="group" aria-label="表示モード">
+        <span class="kq-toggle-label">表示</span>
+        <button class="kq-mode-button is-active" type="button" data-mode="normal" aria-pressed="true">通常表示</button>
+        <button class="kq-mode-button" type="button" data-mode="pdf" aria-pressed="false">白黒PDF風</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="kq-page">
+    <p class="kq-note">最初に見える部分だけで質問の主旨が伝わるようにし、計算や背景は各項目の折り畳みに分けています。</p>
+
+    <article class="kq-card" id="least-squares-convexity">
+      <h2>1. 二乗誤差関数が下に凸であることの確認</h2>
+      <section class="kq-question" aria-label="質問文">
+        <p>最小二乗法の説明で、二乗誤差を \(w_0\) についてまとめると \(w_0^2\) の係数が正、同様に \(w_1\) についてまとめると \(w_1^2\) の係数が正なので、形状は下に凸であり、得られた解は大局解である、という説明がありました。</p>
+        <p>この理解について確認したいです。<br>\(w_0\) だけ、または \(w_1\) だけを動かす一変数関数としては確かに下に凸ですが、\((w_0,w_1)\) を同時に動かす二変数関数として凸性を見る場合は、交差項 \(w_0w_1\) もあるため、ヘッセ行列が半正定値であることを確認する、という理解でよいでしょうか。</p>
+        <p>また、特に \(x_1=x_2\) のような場合には、ヘッセ行列が正定値ではなく半正定値になり、最小点が一点に決まらない平らな方向が出る、という理解で合っていますか。</p>
+      </section>
+
+      <details class="kq-details">
+        <summary>背景：スライドで気になった点</summary>
+        <div class="kq-detail-body">
+          <p>授業スライドでは、二乗誤差</p>
+          \[
+          E(w)=\frac12\sum_{n=1}^2 (y_n-w_0-w_1x_n)^2
+          \]
+          <p>を展開し、</p>
+          \[
+          \begin{aligned}
+          E(w)
+          &=
+          w_0^2
+          +
+          \frac12(x_1^2+x_2^2)w_1^2
+          +
+          (x_1+x_2)w_0w_1 \\
+          &\quad
+          +
+          (-y_1-y_2)w_0
+          +
+          (-y_1x_1-y_2x_2)w_1
+          +
+          \frac12(y_1^2+y_2^2)
+          \end{aligned}
+          \]
+          <p>のような形に整理していた。</p>
+          <p>このとき、\(w_0\) に関する二次関数として見ると \(w_0^2\) の係数は正であり、\(w_1\) に関する二次関数として見ると \(w_1^2\) の係数</p>
+          \[
+          \frac12(x_1^2+x_2^2)
+          \]
+          <p>も非負なので、それぞれの変数だけを見る限り下に凸に見える。</p>
+          <p>しかし、二変数関数としての形状には交差項</p>
+          \[
+          (x_1+x_2)w_0w_1
+          \]
+          <p>も関係するため、各変数ごとの二次係数が正であることだけで、同時変数としての凸性を結論してよいのかが気になった。</p>
+        </div>
+      </details>
+
+      <details class="kq-details">
+        <summary>計算メモ：ヘッセ行列で見る場合</summary>
+        <div class="kq-detail-body">
+          \[
+          E(w)=\frac12\sum_{n=1}^2 (y_n-w_0-w_1x_n)^2
+          \]
+          <p>を \((w_0,w_1)\) の関数として見ると、二階微分に対応するヘッセ行列は</p>
+          \[
+          H
+          =
+          \begin{pmatrix}
+          2 & x_1+x_2 \\
+          x_1+x_2 & x_1^2+x_2^2
+          \end{pmatrix}
+          \]
+          <p>となる。</p>
+          <p>この行列について、</p>
+          \[
+          \det H
+          =
+          2(x_1^2+x_2^2)-(x_1+x_2)^2
+          =
+          (x_1-x_2)^2
+          \]
+          <p>である。</p>
+          <p>したがって、</p>
+          \[
+          \det H \ge 0
+          \]
+          <p>であり、ヘッセ行列は半正定値になる。</p>
+          <p>特に</p>
+          \[
+          x_1\ne x_2
+          \]
+          <p>であれば</p>
+          \[
+          \det H>0
+          \]
+          <p>となるため、ヘッセ行列は正定値となり、二乗誤差関数は厳密に凸になる。</p>
+          <p>一方で</p>
+          \[
+          x_1=x_2
+          \]
+          <p>の場合には</p>
+          \[
+          \det H=0
+          \]
+          <p>となるため、ヘッセ行列は正定値ではなく半正定値にとどまる。この場合、最小点が一点に定まらず、平らな方向をもつ谷のような形になると理解している。</p>
+        </div>
+      </details>
+
+      <details class="kq-details">
+        <summary>教師に確認したい核心</summary>
+        <div class="kq-detail-body">
+          <p>確認したいことは、授業スライドの説明を否定したいというより、次の区別を理解したいという点である。</p>
+          <ul>
+            <li>\(w_0\) だけ、または \(w_1\) だけを見る一変数方向の凸性</li>
+            <li>\((w_0,w_1)\) を同時に動かす二変数関数としての凸性</li>
+            <li>その二変数関数としての凸性を判断するためのヘッセ行列の半正定値性</li>
+            <li>\(x_1=x_2\) のときに出る退化、つまり平らな方向</li>
+          </ul>
+          <div class="kq-core">
+            最終的に聞きたいのは、「授業スライドの説明は、直観的には各変数方向に下に凸であることを見せていて、より厳密にはヘッセ行列の半正定値性を見る、という整理でよいか」という点である。
+          </div>
+        </div>
+      </details>
+    </article>
+
+    <article class="kq-card" id="eigen-compression-counting">
+      <h2>2. 固有値分解によるデータ圧縮率の数え方</h2>
+      <section class="kq-question" aria-label="質問文">
+        <p>固有値分解を使ったデータ圧縮の例で、元の \(5\times5\) 行列は25個の値を持ち、固有値3個と固有ベクトル3本を使って近似すると、固有値3個と固有ベクトルの成分15個で合計18個になるため、約28%削減、という説明がありました。</p>
+        <p>この数え方について確認したいです。<br>画像データを実際に保存するという観点では、保存する数値の個数として \(25\) 個から \(18\) 個に減った、と数えるのが自然なのでしょうか。</p>
+        <p>一方で、固有ベクトルには直交性や長さ1などの制約があるため、数学的には、単なる成分数ではなく、独立に動かせる自由度・次元数で圧縮率を考える見方もあるように思いました。</p>
+        <p>実務上の画像圧縮や機械学習では、圧縮率はスライドのように保存する数値の個数で見るのが標準的なのか、それとも自由度・次元数の観点も重要になるのかを確認したいです。</p>
+      </section>
+
+      <details class="kq-details">
+        <summary>背景：スライドの数え方</summary>
+        <div class="kq-detail-body">
+          <p>スライドでは、元の行列 \(A\) が \(5\times5\) 行列なので、保存する値の数を</p>
+          \[
+          25
+          \]
+          <p>個と数えていた。</p>
+          <p>一方、固有値分解を用いた近似では、</p>
+          \[
+          \lambda_1p_1p_1^\top+\cdots+\lambda_3p_3p_3^\top
+          \]
+          <p>のように、上位3つの固有値・固有ベクトルを用いて近似していた。</p>
+          <p>このとき、保存する値として</p>
+          <ul>
+            <li>固有値3個</li>
+            <li>固有ベクトル3本</li>
+            <li>各固有ベクトルは5成分なので、合計15個</li>
+          </ul>
+          <p>を数え、</p>
+          \[
+          3+15=18
+          \]
+          <p>個とし、</p>
+          \[
+          25 \to 18
+          \]
+          <p>なので約28%削減、と説明していた。</p>
+          <p>この説明は、実装上「保存しておく数値の個数」を数えるという意味では自然に見える。</p>
+        </div>
+      </details>
+
+      <details class="kq-details">
+        <summary>気になった点：自由度としては成分数と一致しないのではないか</summary>
+        <div class="kq-detail-body">
+          <p>固有ベクトルは、任意の5次元ベクトルではなく、通常は正規直交系として取る。</p>
+          <p>つまり、</p>
+          \[
+          \|p_i\|=1
+          \]
+          <p>や</p>
+          \[
+          p_i^\top p_j=0 \quad (i\ne j)
+          \]
+          <p>といった制約がある。</p>
+          <p>そのため、固有ベクトル3本を単純に</p>
+          \[
+          5\times3=15
+          \]
+          <p>個の自由な数値として数えると、数学的な自由度としては少し過大に数えているようにも思える。</p>
+          <p>たとえば、5次元空間内の3本の正規直交ベクトル全体は Stiefel 多様体として見られ、その自由度は</p>
+          \[
+          5\cdot3-\frac{3(3+1)}2
+          =
+          15-6
+          =
+          9
+          \]
+          <p>となる。</p>
+          <p>そこに固有値3個を加えると、数学的な自由度としては</p>
+          \[
+          9+3=12
+          \]
+          <p>となる。</p>
+          <p>ただし、実際にコンピュータ上で保存する場合、制約を満たすようにパラメータ化して保存しない限り、単純には15個の成分を保存することになるため、保存容量の観点ではスライドのような数え方が自然とも考えられる。</p>
+        </div>
+      </details>
+
+      <details class="kq-details">
+        <summary>教師に確認したい核心</summary>
+        <div class="kq-detail-body">
+          <p>確認したいことは、次の2つの観点の違いである。</p>
+          <p>1つ目は、実装上・保存容量上の数え方である。</p>
+          <p>この観点では、実際に保存する数値の個数を数えるので、</p>
+          \[
+          25 \to 18
+          \]
+          <p>というスライドの説明は自然に見える。</p>
+          <p>2つ目は、数学的・幾何学的な自由度の数え方である。</p>
+          <p>この観点では、固有ベクトルの直交性や正規化条件を考慮するため、単純な成分数ではなく、独立に動かせる自由度を数える方が自然に思える。</p>
+          <div class="kq-core">
+            最終的に聞きたいのは、「画像圧縮や機械学習の実務では、圧縮率を説明するとき、基本的には保存する数値の個数で考えるのが標準的なのか。それとも、固有値分解・特異値分解のような構造をもつ場合には、自由度・次元数の観点も重要になるのか」という点である。
+          </div>
+        </div>
+      </details>
+    </article>
+  </main>
+
+  <footer class="kq-footer">
+    KIREIUI question page. Built for a concise classroom confirmation note.
+  </footer>
+
+  <script>
+    (() => {
+      const KEY = "kirei.questions.theme";
+      const buttons = Array.from(document.querySelectorAll("[data-mode]"));
+
+      const storage = {
+        get() {
+          try {
+            return window.localStorage.getItem(KEY);
+          } catch {
+            return null;
+          }
+        },
+        set(value) {
+          try {
+            window.localStorage.setItem(KEY, value);
+          } catch {
+            /* The page should still work if storage is blocked. */
+          }
+        }
+      };
+
+      const setMode = (mode, persist = true) => {
+        const next = mode === "pdf" ? "pdf" : "normal";
+        document.body.classList.toggle("mode-pdf", next === "pdf");
+        document.body.classList.toggle("mode-normal", next === "normal");
+        buttons.forEach((button) => {
+          const active = button.dataset.mode === next;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+        if (persist) {
+          storage.set(next);
+        }
+        if (window.MathJax?.typesetPromise) {
+          window.MathJax.typesetPromise().catch(() => {});
+        }
+      };
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          setMode(button.dataset.mode);
+          window.setTimeout(() => button.blur(), 0);
+        });
+        button.addEventListener("pointerup", () => {
+          window.setTimeout(() => button.blur(), 0);
+        });
+      });
+
+      setMode(storage.get() || "normal", false);
+    })();
+  </script>
+</body>
+</html>
