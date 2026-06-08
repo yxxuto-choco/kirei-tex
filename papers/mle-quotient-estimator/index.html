@@ -6,10 +6,57 @@
   <title>2507.05628 - Section 3.1 MLE via Quotient Estimator</title>
   <script>
     window.MathJax = {
+      loader: {
+        load: ["[tex]/physics", "[tex]/braket"]
+      },
       tex: {
+        packages: {"[+]": ["physics", "braket"]},
         inlineMath: [["\(", "\)"]],
         displayMath: [["\[", "\]"]],
-        processEscapes: true
+        processEscapes: true,
+        macros: {
+          N: "\\mathbb{N}",
+          R: "\\mathbb{R}",
+          M: "\\MM",
+          X: "\\mathscr{X}",
+          XP: "\\mathscr{X}_{P_0}^*",
+          F: "\\mathscr{F}",
+          B: "\\mathscr{B}",
+          CC: "C(T)",
+          MM: "M(T)",
+          HP: "H_{P_0}",
+          MMM: "\\widetilde{M}",
+          Matp: "\\mathrm{Mat}(p,\\mathbb{R})",
+          Ck: ["C^{#1}(#2)", 2],
+          CkThM: ["C^{#1}(\\Theta;\\MM)", 1],
+          SN: ["\\left\\lVert #1 \\right\\rVert_{\\CC}", 1],
+          CkN: ["\\left\\lVert #2 \\right\\rVert_{C^{#1}(\\Theta)}", 2],
+          MN: ["\\left\\lVert #1 \\right\\rVert_{\\text{TV}}", 1],
+          MTN: ["\\left\\lVert #1 \\right\\rVert_{\\MMM}", 1],
+          OPN: ["\\left\\lVert #1 \\right\\rVert_{\\mathrm{op}}", 1],
+          SovN: ["\\left\\lVert #1 \\right\\rVert_{W^{1,q}(\\Theta)}", 1],
+          WkqN: ["\\left\\lVert #2 \\right\\rVert_{W^{#1}(\\Theta)}", 2],
+          CkThMN: ["\\left\\lVert #2 \\right\\rVert_{\\CkThM[#1]}", 2],
+          innerp: ["\\left\\langle #1 \\right\\rangle", 1],
+          ceil: ["\\left\\lceil #1 \\right\\rceil", 1],
+          asconv: "\\xrightarrow{\\mathrm{a.s.}}",
+          pconv: "\\xrightarrow{\\mathrm{p}}",
+          dconv: "\\xrightarrow{\\mathrm{d}}",
+          E: "\\mathbb{E}",
+          W: "\\mathscr{W}",
+          K: "\\mathcal{K}",
+          idv: "\\mathbf{1}",
+          transp: "\\mathsf{T}",
+          Prob: "\\mathbb{P}",
+          argmax: "\\operatorname*{arg\\,max}",
+          argmin: "\\operatorname*{arg\\,min}",
+          supp: "\\operatorname{supp}",
+          diag: "\\operatorname{diag}",
+          dd: "\\mathrm{d}",
+          ker: "\\operatorname{ker}",
+          textcite: ["\\text{#1}", 1],
+          Cref: ["\\text{#1}", 1]
+        }
       },
       svg: { fontCache: "global" }
     };
@@ -138,7 +185,7 @@
 <div class="math-display">\[
 \begin{aligned}
             \innerp{\mu_1,y} - \innerp{\mu_2,y}
-            &amp;= \innerp*{ \mu_1 - \mu_2 , \lim_{n\to\infty} \K \nu_n }
+            &amp;= \innerp{ \mu_1 - \mu_2 , \lim_{n\to\infty} \K \nu_n }
             = \lim_{n\to\infty} \innerp{ \mu_1 - \mu_2 , \K \nu_n } \\
             &amp;= \lim_{n\to\infty} \innerp{ \nu_n , \K (\mu_1 - \mu_2) }
             = 0,
@@ -155,23 +202,23 @@
 \begin{aligned}
             &amp;\abs{ \qty( \innerp{\mu_n,y} - \frac12 \innerp{\mu_n,\K\mu_n} ) 
                 - \qty( \innerp{\mu,y} - \frac12 \innerp{\mu,\K\mu} ) }\\
-            &amp;\qquad\qquad\qquad\qquad = \abs{ \innerp*{ \mu_n-\mu, y } } 
-                + \frac12 \abs{ \innerp*{ \mu_n+\mu, \K (\mu_n-\mu) } }
+            &amp;\qquad\qquad\qquad\qquad = \abs{ \innerp{ \mu_n-\mu, y } } 
+                + \frac12 \abs{ \innerp{ \mu_n+\mu, \K (\mu_n-\mu) } }
 \end{aligned}
 \]</div>
 <p>When we use \(\{\nu_m\}\) taken above again, it follows from <a class=?xref? href=?#lem-sym_schwartz?>Lemma</a> that</p>
 <div class="math-display">\[
 \begin{aligned}
-            \abs{ \innerp*{ \mu_n-\mu, y } }
-            &amp;= \abs{ \innerp*{ \mu_n-\mu, \lim_{m\to\infty} \K \nu_m } } 
-            = \lim_{m\to\infty} \abs{ \innerp*{ \mu_n-\mu, \K \nu_m } } \\
+            \abs{ \innerp{ \mu_n-\mu, y } }
+            &amp;= \abs{ \innerp{ \mu_n-\mu, \lim_{m\to\infty} \K \nu_m } } 
+            = \lim_{m\to\infty} \abs{ \innerp{ \mu_n-\mu, \K \nu_m } } \\
             &amp;\leq \lim_{m\to \infty} \SN{\K \nu_m} \MTN{[\mu_n-\mu]}
             = \SN{y} \MTN{[\mu_n]-[\mu]}\to 0,\quad n\to \infty.
 \end{aligned}
 \]</div>
 <p>Moreover, it follows that</p>
 <div class="math-display">\[
-            \abs{ \innerp*{ \mu_n+\mu, \K (\mu_n-\mu) } }
+            \abs{ \innerp{ \mu_n+\mu, \K (\mu_n-\mu) } }
             \leq \OPN{\K} \MTN{[\mu_n+\mu]}\MTN{[\mu_n-\mu]}\to 0,
 \]</div>
 <p>as \(n\to \infty\). This ends the proof.</p></div></details>
@@ -220,7 +267,7 @@
           \hat{h}_\varepsilon \asconv h_0 \ \  \text{in} \ \CC \  \text{and} \  \HP.
 \]</div>
 <p>as \(\varepsilon\to0\).</p></div></details>
-<details class="paper-fold" id="eq-func_conti_contrast_uni_conv"><summary>Proof</summary><div class="fold-body"><p>\begin{equation}\label{eq:func_conti_contrast_uni_conv} \sup_{[\mu] \in \widetilde{\Theta}} \abs{ \widetilde{\Phi}_{\varepsilon} ([\mu])- \widetilde{\Phi}([\mu]) } = \sup_{[\mu] \in \widetilde{\Theta}} \varepsilon \abs{ \innerp*{ \mu, Z } } \asconv 0 \end{equation} as \(\varepsilon \to 0\). It follows from <a class=?xref? href=?#prop-WelldefContinuousForMLEContrast?>Proposition</a> and <a class=?xref? href=?#prop-uniquemaximum?>Proposition</a> that, for any \(\delta&gt;0\),</p>
+<details class="paper-fold" id="eq-func_conti_contrast_uni_conv"><summary>Proof</summary><div class="fold-body"><p>\begin{equation}\label{eq:func_conti_contrast_uni_conv} \sup_{[\mu] \in \widetilde{\Theta}} \abs{ \widetilde{\Phi}_{\varepsilon} ([\mu])- \widetilde{\Phi}([\mu]) } = \sup_{[\mu] \in \widetilde{\Theta}} \varepsilon \abs{ \innerp{ \mu, Z } } \asconv 0 \end{equation} as \(\varepsilon \to 0\). It follows from <a class=?xref? href=?#prop-WelldefContinuousForMLEContrast?>Proposition</a> and <a class=?xref? href=?#prop-uniquemaximum?>Proposition</a> that, for any \(\delta&gt;0\),</p>
 <div class="math-display">\[
         \widetilde{\Phi}\left([\mu_0]\right) &gt; \sup_{\MTN{[\mu]-[\mu_0]}\geq\delta} \widetilde{\Phi}\left([\mu]\right).
 \]</div>
@@ -255,3 +302,4 @@
   </script>
 </body>
 </html>
+
