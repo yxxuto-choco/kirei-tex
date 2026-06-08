@@ -11,9 +11,7 @@
         displayMath: [["\\[", "\\]"]],
         processEscapes: true
       },
-      svg: {
-        fontCache: "global"
-      }
+      svg: { fontCache: "global" }
     };
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -34,14 +32,8 @@
       --serif: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif CJK JP", serif;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       color: var(--ink);
@@ -51,7 +43,6 @@
       font-size: 18px;
       line-height: 1.95;
     }
-
     body.mode-pdf {
       --paper: #ffffff;
       --sheet: #ffffff;
@@ -66,22 +57,14 @@
       --shadow: none;
       background: #ffffff;
     }
-
-    a {
-      color: inherit;
-    }
-
+    a { color: inherit; }
     .kq-header,
     .kq-page,
     .kq-footer {
       width: min(100% - 32px, 900px);
       margin-inline: auto;
     }
-
-    .kq-header {
-      padding: 56px 0 24px;
-    }
-
+    .kq-header { padding: 56px 0 24px; }
     .kq-kicker {
       margin: 0 0 0.45rem;
       color: var(--accent);
@@ -91,27 +74,21 @@
       letter-spacing: 0.14em;
       text-transform: uppercase;
     }
-
-    h1,
-    h2,
-    h3 {
+    h1, h2, h3 {
       font-feature-settings: "palt";
       line-height: 1.35;
     }
-
     h1 {
       margin: 0;
       font-size: clamp(2rem, 5.8vw, 3.8rem);
       letter-spacing: -0.035em;
     }
-
     .kq-lead {
       max-width: 760px;
       margin: 1.2rem 0 0;
       color: var(--muted);
       font-size: clamp(1rem, 2vw, 1.12rem);
     }
-
     .kq-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -121,7 +98,6 @@
       font-family: var(--sans);
       font-size: 0.92rem;
     }
-
     .kq-toggle {
       display: inline-flex;
       gap: 0.25rem;
@@ -130,11 +106,7 @@
       border: 1px solid var(--line);
       background: rgba(255, 255, 255, 0.74);
     }
-
-    .mode-pdf .kq-toggle {
-      background: #ffffff;
-    }
-
+    .mode-pdf .kq-toggle { background: #ffffff; }
     .kq-toggle-label {
       margin-right: 0.35rem;
       padding-left: 0.45rem;
@@ -143,7 +115,6 @@
       font-weight: 700;
       letter-spacing: 0.05em;
     }
-
     .kq-mode-button {
       appearance: none;
       border: 0;
@@ -154,23 +125,17 @@
       font: inherit;
       font-weight: 700;
     }
-
     .kq-mode-button:hover,
     .kq-mode-button:focus-visible {
       background: var(--accent-soft);
       color: var(--ink);
       outline: none;
     }
-
     .kq-mode-button.is-active {
       background: var(--ink);
       color: var(--sheet);
     }
-
-    .kq-page {
-      padding: 28px 0 72px;
-    }
-
+    .kq-page { padding: 28px 0 72px; }
     .kq-note {
       margin: 0 0 1.6rem;
       padding: 1rem 1.1rem;
@@ -179,7 +144,6 @@
       color: var(--muted);
       font-size: 0.98rem;
     }
-
     .kq-card {
       margin: 0 0 2rem;
       padding: clamp(1.25rem, 4vw, 2.1rem);
@@ -187,12 +151,8 @@
       background: var(--sheet);
       box-shadow: var(--shadow);
     }
-
     .mode-pdf .kq-card,
-    .mode-pdf .kq-note {
-      box-shadow: none;
-    }
-
+    .mode-pdf .kq-note { box-shadow: none; }
     .kq-card h2 {
       margin: 0 0 1rem;
       padding-bottom: 0.7rem;
@@ -200,27 +160,18 @@
       font-size: clamp(1.45rem, 3vw, 2.05rem);
       letter-spacing: -0.025em;
     }
-
     .kq-question {
       margin: 0 0 1.35rem;
       padding: 0.15rem 0 0.15rem 1rem;
       border-left: 3px solid var(--accent);
     }
-
-    .kq-question p {
-      margin: 0 0 0.9rem;
-    }
-
-    .kq-question p:last-child {
-      margin-bottom: 0;
-    }
-
+    .kq-question p { margin: 0 0 0.9rem; }
+    .kq-question p:last-child { margin-bottom: 0; }
     .kq-details {
       margin-top: 0.85rem;
       border: 1px solid var(--line);
       background: var(--sheet);
     }
-
     .kq-details summary {
       display: flex;
       gap: 0.6rem;
@@ -232,67 +183,38 @@
       line-height: 1.55;
       user-select: none;
     }
-
     .kq-details summary::before {
       content: "＋";
       color: var(--accent);
       font-weight: 700;
     }
-
     .kq-details[open] summary {
       border-bottom: 1px solid var(--line);
       background: var(--soft);
     }
-
-    .kq-details[open] summary::before {
-      content: "－";
-    }
-
-    .kq-detail-body {
-      padding: 1rem clamp(1rem, 3vw, 1.35rem) 1.25rem;
-    }
-
-    .kq-detail-body p {
-      margin: 0 0 1rem;
-    }
-
-    .kq-detail-body p:last-child {
-      margin-bottom: 0;
-    }
-
-    ul,
-    ol {
+    .kq-details[open] summary::before { content: "－"; }
+    .kq-detail-body { padding: 1rem clamp(1rem, 3vw, 1.35rem) 1.25rem; }
+    .kq-detail-body p { margin: 0 0 1rem; }
+    .kq-detail-body p:last-child { margin-bottom: 0; }
+    ul, ol {
       margin: 0.8rem 0 1rem 1.3rem;
       padding: 0;
     }
-
-    li {
-      margin: 0.25rem 0;
-    }
-
+    li { margin: 0.25rem 0; }
     .kq-core {
       margin-top: 1rem;
       padding: 0.9rem 1rem;
       border: 1px solid var(--line);
       background: var(--accent-soft);
     }
-
-    .mode-pdf .kq-core {
-      background: #ffffff;
-    }
-
+    .mode-pdf .kq-core { background: #ffffff; }
     mjx-container[jax="SVG"] {
       max-width: 100%;
       overflow-x: auto;
       overflow-y: hidden;
       padding: 0.1rem 0;
     }
-
-    .MathJax,
-    mjx-container {
-      font-size: 105%;
-    }
-
+    .MathJax, mjx-container { font-size: 105%; }
     .kq-footer {
       padding: 0 0 48px;
       color: var(--subtle);
@@ -300,39 +222,21 @@
       font-size: 0.82rem;
       text-align: center;
     }
-
     @media (max-width: 640px) {
       body {
         font-size: 16px;
         line-height: 1.85;
       }
-
-      .kq-header {
-        padding-top: 34px;
-      }
-
-      .kq-toolbar {
-        align-items: stretch;
-      }
-
+      .kq-header { padding-top: 34px; }
+      .kq-toolbar { align-items: stretch; }
       .kq-toggle {
         width: 100%;
         justify-content: space-between;
       }
-
-      .kq-mode-button {
-        flex: 1;
-      }
-
-      .kq-card {
-        padding: 1.1rem;
-      }
-
-      .kq-question {
-        padding-left: 0.75rem;
-      }
+      .kq-mode-button { flex: 1; }
+      .kq-card { padding: 1.1rem; }
+      .kq-question { padding-left: 0.75rem; }
     }
-
     @media print {
       :root {
         --paper: #ffffff;
@@ -347,29 +251,20 @@
         --accent-soft: #ffffff;
         --shadow: none;
       }
-
       body {
         background: #ffffff !important;
         font-size: 11pt;
         line-height: 1.75;
       }
-
       .kq-header,
       .kq-page,
       .kq-footer {
         width: auto;
         margin: 0;
       }
-
-      .kq-header {
-        padding: 0 0 12pt;
-      }
-
+      .kq-header { padding: 0 0 12pt; }
       .kq-toolbar,
-      .kq-footer {
-        display: none;
-      }
-
+      .kq-footer { display: none; }
       .kq-note,
       .kq-card,
       .kq-details {
@@ -377,19 +272,10 @@
         break-inside: avoid;
         page-break-inside: avoid;
       }
-
-      .kq-card {
-        margin-bottom: 18pt;
-      }
-
+      .kq-card { margin-bottom: 18pt; }
       .kq-details,
-      .kq-detail-body {
-        display: block;
-      }
-
-      .kq-details summary {
-        border-bottom: 1px solid var(--line);
-      }
+      .kq-detail-body { display: block; }
+      .kq-details summary { border-bottom: 1px solid var(--line); }
     }
   </style>
 </head>
@@ -397,7 +283,7 @@
   <header class="kq-header">
     <p class="kq-kicker">KIREIUI Question Sheet</p>
     <h1>授業内容についての確認質問</h1>
-    <p class="kq-lead">以下は、授業内容を否定するためではなく、自分の理解を整理するための確認質問です。詳細な計算は折り畳みに入れています。</p>
+    <p class="kq-lead">授業内容を否定するためではなく、自分の理解を整理するための確認質問です。</p>
     <div class="kq-toolbar" aria-label="表示設定">
       <div class="kq-toggle" role="group" aria-label="表示モード">
         <span class="kq-toggle-label">表示</span>
@@ -408,13 +294,13 @@
   </header>
 
   <main class="kq-page">
-    <p class="kq-note">最初に見える部分だけで質問の主旨が伝わるようにし、計算や背景は各項目の折り畳みに分けています。</p>
+    <p class="kq-note">詳細な計算や背景は折り畳みにまとめています。</p>
 
     <article class="kq-card" id="least-squares-convexity">
       <h2>1. 二乗誤差関数が下に凸であることの確認</h2>
       <section class="kq-question" aria-label="質問文">
         <p>最小二乗法の説明で、二乗誤差を \(w_0\) についてまとめると \(w_0^2\) の係数が正、同様に \(w_1\) についてまとめると \(w_1^2\) の係数が正なので、形状は下に凸であり、得られた解は大局解である、という説明がありました。</p>
-        <p>この理解について確認したいです。<br>\(w_0\) だけ、または \(w_1\) だけを動かす一変数関数としては確かに下に凸ですが、\((w_0,w_1)\) を同時に動かす二変数関数として凸性を見る場合は、交差項 \(w_0w_1\) もあるため、ヘッセ行列が半正定値であることを確認する、という理解でよいでしょうか。</p>
+        <p>\(w_0\) だけ、または \(w_1\) だけを動かす一変数関数としては確かに下に凸ですが、\((w_0,w_1)\) を同時に動かす二変数関数として凸性を見る場合は、交差項 \(w_0w_1\) もあるため、ヘッセ行列が半正定値であることを確認する、という理解でよいでしょうか。</p>
         <p>また、特に \(x_1=x_2\) のような場合には、ヘッセ行列が正定値ではなく半正定値になり、最小点が一点に決まらない平らな方向が出る、という理解で合っていますか。</p>
       </section>
 
@@ -444,27 +330,24 @@
           \frac12(y_1^2+y_2^2)
           \end{aligned}
           \]
-          <p>のような形に整理していた。</p>
+          <p>のような形に整理していました。</p>
           <p>このとき、\(w_0\) に関する二次関数として見ると \(w_0^2\) の係数は正であり、\(w_1\) に関する二次関数として見ると \(w_1^2\) の係数</p>
           \[
           \frac12(x_1^2+x_2^2)
           \]
-          <p>も非負なので、それぞれの変数だけを見る限り下に凸に見える。</p>
+          <p>も非負なので、それぞれの変数だけを見る限り下に凸に見えます。</p>
           <p>しかし、二変数関数としての形状には交差項</p>
           \[
           (x_1+x_2)w_0w_1
           \]
-          <p>も関係するため、各変数ごとの二次係数が正であることだけで、同時変数としての凸性を結論してよいのかが気になった。</p>
+          <p>も関係するため、各変数ごとの二次係数が正であることだけで、同時変数としての凸性を結論してよいのかが気になりました。</p>
         </div>
       </details>
 
       <details class="kq-details">
         <summary>計算メモ：ヘッセ行列で見る場合</summary>
         <div class="kq-detail-body">
-          \[
-          E(w)=\frac12\sum_{n=1}^2 (y_n-w_0-w_1x_n)^2
-          \]
-          <p>を \((w_0,w_1)\) の関数として見ると、二階微分に対応するヘッセ行列は</p>
+          <p>\(E(w)=\frac12\sum_{n=1}^2 (y_n-w_0-w_1x_n)^2\) を \((w_0,w_1)\) の関数として見ると、二階微分に対応するヘッセ行列は</p>
           \[
           H
           =
@@ -473,7 +356,7 @@
           x_1+x_2 & x_1^2+x_2^2
           \end{pmatrix}
           \]
-          <p>となる。</p>
+          <p>となります。</p>
           <p>この行列について、</p>
           \[
           \det H
@@ -482,12 +365,12 @@
           =
           (x_1-x_2)^2
           \]
-          <p>である。</p>
+          <p>です。</p>
           <p>したがって、</p>
           \[
           \det H \ge 0
           \]
-          <p>であり、ヘッセ行列は半正定値になる。</p>
+          <p>であり、ヘッセ行列は半正定値になります。</p>
           <p>特に</p>
           \[
           x_1\ne x_2
@@ -496,7 +379,7 @@
           \[
           \det H>0
           \]
-          <p>となるため、ヘッセ行列は正定値となり、二乗誤差関数は厳密に凸になる。</p>
+          <p>となるため、ヘッセ行列は正定値となり、二乗誤差関数は厳密に凸になります。</p>
           <p>一方で</p>
           \[
           x_1=x_2
@@ -505,32 +388,36 @@
           \[
           \det H=0
           \]
-          <p>となるため、ヘッセ行列は正定値ではなく半正定値にとどまる。この場合、最小点が一点に定まらず、平らな方向をもつ谷のような形になると理解している。</p>
+          <p>となるため、ヘッセ行列は正定値ではなく半正定値にとどまります。この場合、最小点が一点に定まらず、平らな方向をもつ谷のような形になると理解しています。</p>
         </div>
       </details>
 
       <details class="kq-details">
-        <summary>教師に確認したい核心</summary>
+        <summary>補足：別の単純な例</summary>
         <div class="kq-detail-body">
-          <p>確認したいことは、授業スライドの説明を否定したいというより、次の区別を理解したいという点である。</p>
-          <ul>
-            <li>\(w_0\) だけ、または \(w_1\) だけを見る一変数方向の凸性</li>
-            <li>\((w_0,w_1)\) を同時に動かす二変数関数としての凸性</li>
-            <li>その二変数関数としての凸性を判断するためのヘッセ行列の半正定値性</li>
-            <li>\(x_1=x_2\) のときに出る退化、つまり平らな方向</li>
-          </ul>
-          <div class="kq-core">
-            最終的に聞きたいのは、「授業スライドの説明は、直観的には各変数方向に下に凸であることを見せていて、より厳密にはヘッセ行列の半正定値性を見る、という整理でよいか」という点である。
-          </div>
+          <p>例えば、</p>
+          \[
+          f(w_0,w_1)=w_0^2+w_1^2+4w_0w_1
+          \]
+          <p>を考えると、\(w_0^2\) と \(w_1^2\) の係数はどちらも正です。</p>
+          <p>しかし、ヘッセ行列は</p>
+          \[
+          \begin{pmatrix}
+          2 & 4\\
+          4 & 2
+          \end{pmatrix}
+          \]
+          <p>となり、固有値は \(6\) と \(-2\) です。したがって、この関数は一方向には下に凸でも、全体としては凸ではなく、鞍点をもつ形になります。</p>
+          <p>この例を見ると、対角成分だけではなく、交差項や全体のヘッセ行列を見る必要があることが分かりやすいのではないかと思いました。</p>
         </div>
       </details>
     </article>
 
     <article class="kq-card" id="eigen-compression-counting">
-      <h2>2. 固有値分解によるデータ圧縮率の数え方</h2>
+      <h2>2. 固有値分解と特異値分解によるデータ圧縮率の数え方</h2>
       <section class="kq-question" aria-label="質問文">
         <p>固有値分解を使ったデータ圧縮の例で、元の \(5\times5\) 行列は25個の値を持ち、固有値3個と固有ベクトル3本を使って近似すると、固有値3個と固有ベクトルの成分15個で合計18個になるため、約28%削減、という説明がありました。</p>
-        <p>この数え方について確認したいです。<br>画像データを実際に保存するという観点では、保存する数値の個数として \(25\) 個から \(18\) 個に減った、と数えるのが自然なのでしょうか。</p>
+        <p>この数え方について確認したいです。画像データを実際に保存するという観点では、保存する数値の個数として \(25\) 個から \(18\) 個に減った、と数えるのが自然なのでしょうか。</p>
         <p>一方で、固有ベクトルには直交性や長さ1などの制約があるため、数学的には、単なる成分数ではなく、独立に動かせる自由度・次元数で圧縮率を考える見方もあるように思いました。</p>
         <p>実務上の画像圧縮や機械学習では、圧縮率はスライドのように保存する数値の個数で見るのが標準的なのか、それとも自由度・次元数の観点も重要になるのかを確認したいです。</p>
       </section>
@@ -542,12 +429,12 @@
           \[
           25
           \]
-          <p>個と数えていた。</p>
+          <p>個と数えていました。</p>
           <p>一方、固有値分解を用いた近似では、</p>
           \[
           \lambda_1p_1p_1^\top+\cdots+\lambda_3p_3p_3^\top
           \]
-          <p>のように、上位3つの固有値・固有ベクトルを用いて近似していた。</p>
+          <p>のように、上位3つの固有値・固有ベクトルを用いて近似していました。</p>
           <p>このとき、保存する値として</p>
           <ul>
             <li>固有値3個</li>
@@ -562,15 +449,15 @@
           \[
           25 \to 18
           \]
-          <p>なので約28%削減、と説明していた。</p>
-          <p>この説明は、実装上「保存しておく数値の個数」を数えるという意味では自然に見える。</p>
+          <p>なので約28%削減、と説明していました。</p>
+          <p>この説明は、実装上「保存しておく数値の個数」を数えるという意味では自然に見えます。</p>
         </div>
       </details>
 
       <details class="kq-details">
-        <summary>気になった点：自由度としては成分数と一致しないのではないか</summary>
+        <summary>気になった点：自由度と保存個数は別ではないでしょうか</summary>
         <div class="kq-detail-body">
-          <p>固有ベクトルは、任意の5次元ベクトルではなく、通常は正規直交系として取る。</p>
+          <p>固有ベクトルは、任意の5次元ベクトルではなく、通常は正規直交系として取ります。</p>
           <p>つまり、</p>
           \[
           \|p_i\|=1
@@ -579,53 +466,50 @@
           \[
           p_i^\top p_j=0 \quad (i\ne j)
           \]
-          <p>といった制約がある。</p>
+          <p>といった制約があります。</p>
           <p>そのため、固有ベクトル3本を単純に</p>
           \[
           5\times3=15
           \]
-          <p>個の自由な数値として数えると、数学的な自由度としては少し過大に数えているようにも思える。</p>
-          <p>たとえば、5次元空間内の3本の正規直交ベクトル全体は Stiefel 多様体として見られ、その自由度は</p>
-          \[
-          5\cdot3-\frac{3(3+1)}2
-          =
-          15-6
-          =
-          9
-          \]
-          <p>となる。</p>
-          <p>そこに固有値3個を加えると、数学的な自由度としては</p>
-          \[
-          9+3=12
-          \]
-          <p>となる。</p>
-          <p>ただし、実際にコンピュータ上で保存する場合、制約を満たすようにパラメータ化して保存しない限り、単純には15個の成分を保存することになるため、保存容量の観点ではスライドのような数え方が自然とも考えられる。</p>
+          <p>個の自由な数値として数えると、数学的な自由度としては少し過大に数えているようにも思えます。</p>
+          <p>ただし、実際にコンピュータ上で保存する場合には、制約を満たすように圧縮表現を工夫しない限り、結局は成分をそのまま並べて保存することになるので、保存容量の観点ではスライドの数え方も理解しやすいです。</p>
+          <p>一方で、もし \(5\times5\) の対称行列について、固有値5個と5本の固有ベクトルをそのまますべて保存すると、\(5+25=30\) 個のデータになって、元の \(25\) 個より多くなってしまいます。そう考えると、圧縮率としては「何個保存するか」だけでなく、構造を利用してどこまで本当に減っているのかを見る方が自然にも思えます。</p>
         </div>
       </details>
 
       <details class="kq-details">
-        <summary>教師に確認したい核心</summary>
+        <summary>特異値分解との関係</summary>
         <div class="kq-detail-body">
-          <p>確認したいことは、次の2つの観点の違いである。</p>
-          <p>1つ目は、実装上・保存容量上の数え方である。</p>
-          <p>この観点では、実際に保存する数値の個数を数えるので、</p>
+          <p>一般の行列 \(A\in\mathbb{R}^{m\times n}\) では、固有値分解ではなく、</p>
           \[
-          25 \to 18
+          A=U\Sigma V^\top
           \]
-          <p>というスライドの説明は自然に見える。</p>
-          <p>2つ目は、数学的・幾何学的な自由度の数え方である。</p>
-          <p>この観点では、固有ベクトルの直交性や正規化条件を考慮するため、単純な成分数ではなく、独立に動かせる自由度を数える方が自然に思える。</p>
+          <p>という特異値分解（SVD）を使うのが自然だと思いました。</p>
+          <p>ここで、\(V\) の列ベクトルは \(A^\top A\) の固有ベクトルとして現れるので、右特異ベクトルは互いに直交します。また、</p>
+          \[
+          u_i=\frac{Av_i}{\sigma_i}
+          \]
+          <p>と定めると、左特異ベクトル \(u_i\) も互いに直交するはずです。</p>
+          <p>つまり、SVDは一般行列を直接対角化しているというより、\(A^\top A\) と \(AA^\top\) の対称性を通して、入力側と出力側の方向を整理している分解だと理解しています。</p>
+          <p>さらに、もし行列が対称で、SVDの左右の特異ベクトルが一致する場合には、構造としては対称行列の固有値分解と次元的にちょうど対応している、という見方ができるのではないかと考えました。</p>
+        </div>
+      </details>
+
+      <details class="kq-details">
+        <summary>確認したい点</summary>
+        <div class="kq-detail-body">
+          <p>確認したいのは、次の2点です。</p>
+          <p>1つ目は、圧縮率の説明では、実務上は「保存する数値の個数」で考えるのが自然であり、\(25 \to 18\) という言い方は妥当だという点です。</p>
+          <p>2つ目は、数学的には自由度や次元数の見方も重要であり、SVDでは直交性が \(A^\top A\) や \(AA^\top\) から導かれること、さらに対称行列の場合には左右の特異ベクトルが一致して、固有値分解と整合することをどう整理して理解するのがよいか、という点です。</p>
           <div class="kq-core">
-            最終的に聞きたいのは、「画像圧縮や機械学習の実務では、圧縮率を説明するとき、基本的には保存する数値の個数で考えるのが標準的なのか。それとも、固有値分解・特異値分解のような構造をもつ場合には、自由度・次元数の観点も重要になるのか」という点である。
+            特に、\(25\) 個から \(18\) 個に減るという説明はわかりやすい一方で、実際には「7個削減」と言う方が具体的で、約28%削減という言い方は補足として添えるのが自然ではないか、とも思いました。
           </div>
         </div>
       </details>
     </article>
   </main>
 
-  <footer class="kq-footer">
-    KIREIUI question page. Built for a concise classroom confirmation note.
-  </footer>
+  <footer class="kq-footer">KIREIUI question page. Built for a concise classroom confirmation note.</footer>
 
   <script>
     (() => {
@@ -634,18 +518,10 @@
 
       const storage = {
         get() {
-          try {
-            return window.localStorage.getItem(KEY);
-          } catch {
-            return null;
-          }
+          try { return window.localStorage.getItem(KEY); } catch { return null; }
         },
         set(value) {
-          try {
-            window.localStorage.setItem(KEY, value);
-          } catch {
-            /* The page should still work if storage is blocked. */
-          }
+          try { window.localStorage.setItem(KEY, value); } catch { /* storage may be blocked */ }
         }
       };
 
@@ -658,9 +534,7 @@
           button.classList.toggle("is-active", active);
           button.setAttribute("aria-pressed", active ? "true" : "false");
         });
-        if (persist) {
-          storage.set(next);
-        }
+        if (persist) storage.set(next);
         if (window.MathJax?.typesetPromise) {
           window.MathJax.typesetPromise().catch(() => {});
         }
