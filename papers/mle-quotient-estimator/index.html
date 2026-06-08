@@ -2,30 +2,473 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=../2507.05628/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MLE via Quotient Estimator</title>
+  <title>2507.05628 - Section 3.1 MLE via Quotient Estimator</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["\\(", "\\)"]],
+        displayMath: [["\\[", "\\]"]],
+        processEscapes: true
+      },
+      svg: { fontCache: "global" }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <style>
+    :root {
+      --paper: #fffaf4;
+      --sheet: #ffffff;
+      --ink: #201a15;
+      --muted: #6b6258;
+      --line: #e2d7c8;
+      --line-strong: #c4b39d;
+      --accent: #8b4f22;
+      --accent-soft: #fbede0;
+      --accent-2: #4d6a83;
+      --shadow: 0 18px 48px rgba(48, 34, 20, 0.1);
+      --sans: "Yu Gothic", "Hiragino Sans", "Noto Sans CJK JP", system-ui, sans-serif;
+      --serif: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif CJK JP", serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      font-family: system-ui, sans-serif;
-      color: #222;
-      background: #faf7f2;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(139, 79, 34, 0.08), transparent 28rem),
+        linear-gradient(180deg, #fcf6ee 0%, var(--paper) 24rem, #f8f2e8 100%);
+      font-family: var(--serif);
+      font-size: 18px;
+      line-height: 1.95;
     }
-    p {
-      padding: 1rem 1.25rem;
-      border: 1px solid #ddd4c7;
+    body.mode-mono {
+      --paper: #ffffff;
+      --sheet: #ffffff;
+      --ink: #111111;
+      --muted: #555555;
+      --line: #cfcfcf;
+      --line-strong: #666666;
+      --accent: #111111;
+      --accent-soft: #ffffff;
+      --accent-2: #111111;
+      --shadow: none;
+      background: #ffffff;
+    }
+
+    a { color: inherit; }
+    .page,
+    .masthead,
+    .footer {
+      width: min(100% - 32px, 940px);
+      margin-inline: auto;
+    }
+
+    .masthead {
+      padding: 56px 0 26px;
+    }
+    .kicker {
+      margin: 0 0 0.45rem;
+      color: var(--accent);
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3 {
+      font-feature-settings: "palt";
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5.5vw, 4rem);
+    }
+    .subtitle {
+      margin: 1rem 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      max-width: 760px;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1.5rem;
+      font-family: var(--sans);
+      font-size: 0.92rem;
+    }
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.3rem;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.8);
+    }
+    .toggle-label {
+      margin-right: 0.35rem;
+      padding-left: 0.45rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .mode-button {
+      appearance: none;
+      border: 0;
+      padding: 0.45rem 0.72rem;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+    .mode-button:hover,
+    .mode-button:focus-visible {
+      outline: none;
+      background: var(--accent-soft);
+      color: var(--ink);
+    }
+    .mode-button.is-active {
+      background: var(--ink);
+      color: var(--sheet);
+    }
+    .page { padding: 16px 0 72px; }
+    .lede {
+      margin: 0 0 1.6rem;
+      padding: 1rem 1.1rem;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.76);
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1.6rem;
+    }
+    .summary-card {
+      padding: 1rem 1.05rem;
+      border: 1px solid var(--line);
+      background: var(--sheet);
+      box-shadow: var(--shadow);
+    }
+    .summary-card h2 {
+      margin: 0 0 0.55rem;
+      font-size: 1rem;
+    }
+    .summary-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .article {
+      padding: clamp(1.2rem, 3.8vw, 2rem);
+      border: 1px solid var(--line-strong);
+      background: var(--sheet);
+      box-shadow: var(--shadow);
+    }
+    .article h2 {
+      margin: 0 0 1rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--line-strong);
+      font-size: clamp(1.45rem, 3vw, 2.1rem);
+    }
+    .section-note {
+      margin: 0 0 1.4rem;
+      color: var(--muted);
+    }
+    .callout {
+      margin: 1rem 0 1.2rem;
+      padding: 0.95rem 1rem;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+    }
+    .callout strong {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-family: var(--sans);
+    }
+    .box {
+      margin: 1rem 0 1.2rem;
+      padding: 1rem 1.1rem;
+      border: 1px solid var(--line);
       background: #fff;
     }
-    a {
-      color: inherit;
+    .box-title {
+      margin: 0 0 0.5rem;
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--accent-2);
+      text-transform: uppercase;
+    }
+    .math-block {
+      margin: 1rem 0;
+      text-align: center;
+      overflow-x: auto;
+      padding: 0.2rem 0;
+    }
+    .note-list {
+      margin: 0.8rem 0 1rem 1.2rem;
+      padding: 0;
+    }
+    .note-list li { margin: 0.25rem 0; }
+    details {
+      margin: 0.9rem 0 1rem;
+      border: 1px solid var(--line);
+      background: var(--sheet);
+    }
+    summary {
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      font-family: var(--sans);
+      font-weight: 700;
+      user-select: none;
+      list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::before {
+      content: "＋";
+      margin-right: 0.55rem;
+      color: var(--accent);
+    }
+    details[open] summary {
+      border-bottom: 1px solid var(--line);
+      background: #faf6ef;
+    }
+    details[open] summary::before { content: "－"; }
+    .detail-body {
+      padding: 1rem 1.1rem 1.2rem;
+    }
+    .detail-body p {
+      margin: 0 0 1rem;
+    }
+    .detail-body p:last-child { margin-bottom: 0; }
+    .footer {
+      padding: 0 0 48px;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      text-align: center;
+    }
+    mjx-container[jax="SVG"] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+    @media (max-width: 760px) {
+      body {
+        font-size: 16px;
+        line-height: 1.85;
+      }
+      .masthead {
+        padding-top: 34px;
+      }
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+      .toggle {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .mode-button {
+        flex: 1;
+      }
+      .article {
+        padding: 1.1rem;
+      }
+    }
+    @media print {
+      :root {
+        --paper: #fff;
+        --sheet: #fff;
+        --ink: #000;
+        --muted: #333;
+        --line: #bfbfbf;
+        --line-strong: #333;
+        --accent: #000;
+        --accent-soft: #fff;
+        --accent-2: #000;
+        --shadow: none;
+      }
+      body {
+        background: #fff !important;
+        font-size: 11pt;
+        line-height: 1.72;
+      }
+      .toolbar,
+      .footer {
+        display: none;
+      }
+      .summary-card,
+      .article,
+      .lede,
+      details {
+        box-shadow: none;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      details, .detail-body { display: block; }
+      details summary { border-bottom: 1px solid var(--line); }
     }
   </style>
 </head>
-<body>
-  <p>Redirecting to <a href="../2507.05628/">the readable page</a>.</p>
+<body class="mode-rich">
+  <header class="masthead">
+    <p class="kicker">Paper Reader / KireiUI Trial</p>
+    <h1>2507.05628: Section 3.1</h1>
+    <p class="subtitle">MLE via Quotient Estimator を、長い本文を追わなくても要点が見える形に並べた試作です。</p>
+    <div class="toolbar" aria-label="表示設定">
+      <div class="toggle" role="group" aria-label="表示モード">
+        <span class="toggle-label">表示</span>
+        <button class="mode-button is-active" type="button" data-mode="rich" aria-pressed="true">リッチ</button>
+        <button class="mode-button" type="button" data-mode="mono" aria-pressed="false">白黒</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <p class="lede">この節では、観測モデルのパラメータ \(\mu\) をそのまま最適化するのではなく、同じ \(h=K\mu\) を与える同値類の上で考えることで、推定問題を quotient space に落とし込んでいます。</p>
+
+    <section class="summary-grid" aria-label="要点">
+      <div class="summary-card">
+        <h2>1. 何をしているか</h2>
+        <p>MLE を \(h=K\mu\) だけが本質になるように書き直し、同じ観測を与える \(\mu\) の冗長性を quotient で消しています。</p>
+      </div>
+      <div class="summary-card">
+        <h2>2. なぜ必要か</h2>
+        <p>\(\mu\) は一意でなくても \(h_0\) は一意に定まるので、推定対象は \(\mu\) そのものより \([\mu]\) です。</p>
+      </div>
+      <div class="summary-card">
+        <h2>3. 結論</h2>
+        <p>\(\hat h_\varepsilon = K\hat\mu_\varepsilon\) は \(\varepsilon \to 0\) で真の \(h_0\) に近づく、という主張がこの節の核です。</p>
+      </div>
+    </section>
+
+    <article class="article">
+      <h2>Section 3.1. MLE via Quotient Estimator</h2>
+      <p class="section-note">このページでは、説明の流れを「問題設定」「quotient の導入」「推定量」「収束の主張」に分けています。</p>
+
+      <div class="box">
+        <p class="box-title">Notation</p>
+        <p>観測モデルは、平均関数 \(h_0\) を通して書くと \(h_0 = K\mu_0\) の形になります。ここで \(K\) は線形作用素、\(\mu_0\) は潜在パラメータです。</p>
+        <div class="math-block">\[
+        h_0 = K\mu_0
+        \]</div>
+        <p>ただし、\(\mu_0\) は一意ではなく、同じ \(h_0\) を与える \(\mu\) が複数あります。そのため、\(\mu\) 自体ではなく同値類 \([\mu]\) を扱います。</p>
+      </div>
+
+      <details open>
+        <summary>なぜ quotient space が出てくるのか</summary>
+        <div class="detail-body">
+          <p>この節の出発点は、観測に現れるのは \(\mu\) の全成分ではなく、\(K\mu\) だけだという点です。したがって、\(\ker K\) に沿った違いは観測上区別できません。</p>
+          <p>そこで、\(\mathcal{M}(T)\) を \(\ker K\) で割った quotient space を考え、\(\mu\) の冗長性を消します。</p>
+          <div class="math-block">\[
+          \mathcal{M}_f = \mathcal{M}(T) / \ker K
+          \]</div>
+          <p>この見方を採ると、「どの \(\mu\) を選ぶか」ではなく、「どの同値類 \([\mu]\) が最尤か」を問う問題に整理できます。</p>
+        </div>
+      </details>
+
+      <div class="callout">
+        <strong>核心</strong>
+        MLE は、元のパラメータ空間で直接最適化するのではなく、同じ観測を表す同値類の空間で最適化するのが自然です。
+      </div>
+
+      <div class="box">
+        <p class="box-title">Estimator</p>
+        <p>節の主張は、尤度関数 \(\Phi_\varepsilon\) を quotient space 上で最大化する推定量として書かれます。</p>
+        <div class="math-block">\[
+        \hat\mu_\varepsilon = \arg\max_{[\mu] \in \Theta_e} \Phi_\varepsilon([\mu])
+        \]</div>
+        <p>そして、推定した平均関数は</p>
+        <div class="math-block">\[
+        \hat h_\varepsilon = K\hat\mu_\varepsilon
+        \]</div>
+        <p>で与えられます。ここで大事なのは、\(\hat\mu_\varepsilon\) そのものより \([\hat\mu_\varepsilon]\) が意味を持つ、という点です。</p>
+      </div>
+
+      <details>
+        <summary>収束の主張を読む</summary>
+        <div class="detail-body">
+          <p>この節の最後では、ノイズが小さくなる極限で、推定された同値類と平均関数が真の対象へ近づくことが述べられています。</p>
+          <div class="math-block">\[
+          [\hat\mu_\varepsilon] \to [\mu_0]
+          \qquad
+          \hat h_\varepsilon \to h_0
+          \quad (\varepsilon \to 0)
+          \]</div>
+          <p>要するに、quotient estimator にすると、推定が「パラメータの取り方」に依存しない形に整います。ここが、この節を読むときの一番のポイントです。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>読み方のメモ</summary>
+        <div class="detail-body">
+          <ul class="note-list">
+            <li>\(h_0 = K\mu_0\) は「観測に効く量」だけを抜き出した式です。</li>
+            <li>\(\ker K\) は観測に見えない方向で、その分だけ \(\mu\) に自由度があります。</li>
+            <li>\(\Theta_e\) は最適化の場を quotient space に移した記法だと読むと追いやすいです。</li>
+            <li>この節は「\(\mu\) を直接当てる」のではなく、「同じ \(h\) をもつクラスの中で最尤のものを選ぶ」話です。</li>
+          </ul>
+        </div>
+      </details>
+    </article>
+  </main>
+
+  <footer class="footer">
+    Based on arXiv:2507.05628, section 3.1. Section text is summarized and reformatted for readability.
+  </footer>
+
+  <script>
+    (() => {
+      const KEY = "kirei.paper.mode";
+      const buttons = Array.from(document.querySelectorAll("[data-mode]"));
+
+      const storage = {
+        get() {
+          try { return window.localStorage.getItem(KEY); } catch { return null; }
+        },
+        set(value) {
+          try { window.localStorage.setItem(KEY, value); } catch { /* ignore */ }
+        }
+      };
+
+      const setMode = (mode, persist = true) => {
+        const next = mode === "mono" ? "mono" : "rich";
+        document.body.classList.toggle("mode-mono", next === "mono");
+        document.body.classList.toggle("mode-rich", next === "rich");
+        buttons.forEach((button) => {
+          const active = button.dataset.mode === next;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+        if (persist) storage.set(next);
+        if (window.MathJax?.typesetPromise) {
+          window.MathJax.typesetPromise().catch(() => {});
+        }
+      };
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          setMode(button.dataset.mode);
+          window.setTimeout(() => button.blur(), 0);
+        });
+        button.addEventListener("pointerup", () => {
+          window.setTimeout(() => button.blur(), 0);
+        });
+      });
+
+      setMode(storage.get() || "rich", false);
+    })();
+  </script>
 </body>
 </html>
